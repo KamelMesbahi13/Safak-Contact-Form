@@ -32,7 +32,7 @@ require_once SAFAK_POPUP_INCLUDES . 'class-ajax-handler.php';
 require_once SAFAK_POPUP_INCLUDES . 'class-shortcode.php';
 
 // ── Activation / Deactivation Hooks ─────────────────────────────────────────
-register_activation_hook(   __FILE__, [ 'Safak_Database', 'create_table' ] );
+register_activation_hook(   __FILE__, [ 'Safak_Medical_Popup', 'activate' ] );
 register_deactivation_hook( __FILE__, [ 'Safak_Medical_Popup', 'deactivate' ] );
 
 /**
@@ -59,6 +59,9 @@ final class Safak_Medical_Popup {
         // Initialise sub-components.
         Safak_Ajax_Handler::init();
         Safak_Shortcode::init();
+
+        // Register daily database cleanup cron action.
+        add_action( 'safak_daily_cleanup_submissions', [ 'Safak_Database', 'delete_old_submissions' ] );
     }
 
     /** Load plugin text domain for future server-side i18n. */
@@ -125,8 +128,18 @@ final class Safak_Medical_Popup {
         );
     }
 
+    /** Activation – create database table, schedule daily cleanup cron event. */
+    public static function activate(): void {
+        Safak_Database::create_table();
+
+        if ( ! wp_next_scheduled( 'safak_daily_cleanup_submissions' ) ) {
+            wp_schedule_event( time(), 'daily', 'safak_daily_cleanup_submissions' );
+        }
+    }
+
     /** Deactivation – flush rewrite rules, etc. (table kept intentionally). */
     public static function deactivate(): void {
+        wp_clear_scheduled_hook( 'safak_daily_cleanup_submissions' );
         flush_rewrite_rules();
     }
 }

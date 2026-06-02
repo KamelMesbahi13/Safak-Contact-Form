@@ -39,6 +39,35 @@ class Safak_Ajax_Handler {
             wp_send_json_error( [ 'message' => 'Security check failed.' ], 403 );
         }
 
+        // ── 1b. Honeypot Check (Spam Prevention) ──────────────────────────────
+        if ( ! empty( $_POST['safak_honeypot'] ) ) {
+            wp_send_json_error( [ 'message' => 'Spam detected.' ], 400 );
+        }
+
+        // ── 1c. IP-Based Rate Limiting (Transients sliding window) ───────────
+        $client_ip     = self::get_client_ip();
+        $ip_hash       = md5( $client_ip );
+        $transient_key = 'safak_limit_' . $ip_hash;
+
+        $submissions = get_transient( $transient_key );
+        if ( ! is_array( $submissions ) ) {
+            $submissions = [];
+        }
+
+        $current_time = time();
+        // Keep only submissions within the last 1 hour
+        $submissions = array_filter( $submissions, function( $timestamp ) use ( $current_time ) {
+            return $timestamp > ( $current_time - HOUR_IN_SECONDS );
+        } );
+
+        if ( count( $submissions ) >= 3 ) {
+            wp_send_json_error( [ 'message' => 'Too many requests. Please try again later.' ], 429 );
+        }
+
+        // Log the current request timestamp
+        $submissions[] = $current_time;
+        set_transient( $transient_key, $submissions, HOUR_IN_SECONDS );
+
         // ── 2. Sanitise & Validate ───────────────────────────────────────────
         $first_name       = sanitize_text_field( wp_unslash( $_POST['first_name']       ?? '' ) );
         $last_name        = sanitize_text_field( wp_unslash( $_POST['last_name']        ?? '' ) );
@@ -72,7 +101,7 @@ class Safak_Ajax_Handler {
         }
 
         // ── 3. Collect visitor IP (privacy-conscious – last octet masked). ──
-        $raw_ip    = self::get_client_ip();
+        $raw_ip    = $client_ip;
         $ip_masked = self::mask_ip( $raw_ip );
 
         // Construct full combined phone number for database and default logging
@@ -135,14 +164,28 @@ class Safak_Ajax_Handler {
         ];
         $lang_display = $lang_labels[ $language ] ?? 'Unknown';
 
+        // ── 4. Prevent Email Header Injection ────────────────────────────────
+        // Explicitly strip carriage return (\r) and newline (\n) characters.
+        $first_name_clean = str_replace( [ "\r", "\n" ], '', $first_name );
+        $last_name_clean  = str_replace( [ "\r", "\n" ], '', $last_name );
+
         $subject = sprintf(
             '[Safak Medical] New Consultation Request from %s %s',
-            $first_name,
-            $last_name
+            $first_name_clean,
+            $last_name_clean
         );
 
-        $message_escaped = nl2br( esc_html( $message ) );
-        $submitted_at    = current_time( 'F j, Y – H:i' ) . ' (server time)';
+        // ── 3. Defense-in-Depth against XSS (Late Escaping) ──────────────────
+        // Wrap dynamic user variables in esc_html() right before outputting.
+        $esc_first_name       = esc_html( $first_name );
+        $esc_last_name        = esc_html( $last_name );
+        $esc_phone            = esc_html( $phone );
+        $esc_country_name     = esc_html( $country_name );
+        $esc_country_code     = esc_html( $country_code );
+        $esc_country_flag_iso = esc_html( $country_flag_iso );
+        $esc_message          = nl2br( esc_html( $message ) );
+        $esc_ip               = esc_html( $ip );
+        $submitted_at         = esc_html( current_time( 'F j, Y – H:i' ) . ' (server time)' );
 
         $html = <<<HTML
 <!DOCTYPE html>
@@ -194,7 +237,7 @@ class Safak_Ajax_Handler {
                       <tr>
                         <td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Full Name</td>
                         <td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;">
-                          {$first_name} {$last_name}
+                          {$esc_first_name} {$esc_last_name}
                         </td>
                       </tr>
                       <tr>
@@ -203,7 +246,7 @@ class Safak_Ajax_Handler {
                       <tr>
                         <td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Country</td>
                         <td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;">
-                          <img src="https://flagcdn.com/20x15/{$country_flag_iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,0.15);" /> {$country_name}
+                          <img src="https://flagcdn.com/20x15/{$esc_country_flag_iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,0.15);" /> {$esc_country_name}
                         </td>
                       </tr>
                       <tr>
@@ -212,7 +255,7 @@ class Safak_Ajax_Handler {
                       <tr>
                         <td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Phone Number</td>
                         <td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;">
-                          <a href="tel:{$country_code}{$phone}" style="color:#00558F;text-decoration:none;">{$country_code} {$phone}</a>
+                          <a href="tel:{$esc_country_code}{$esc_phone}" style="color:#00558F;text-decoration:none;">{$esc_country_code} {$esc_phone}</a>
                         </td>
                       </tr>
                       <tr>
@@ -233,7 +276,7 @@ class Safak_Ajax_Handler {
                       Message / Comment
                     </p>
                     <div style="background:#F8FAFD;border-left:3px solid #00558F;border-radius:0 8px 8px 0;padding:16px 20px;font-size:14px;color:#2C3E50;line-height:1.7;min-height:48px;">
-                      {$message_escaped}
+                      {$esc_message}
                     </div>
                   </td>
                 </tr>
@@ -245,7 +288,7 @@ class Safak_Ajax_Handler {
           <!-- CTA -->
           <tr>
             <td style="padding:0 40px 40px;text-align:center;">
-              <a href="tel:{$country_code}{$phone}"
+              <a href="tel:{$esc_country_code}{$esc_phone}"
                  style="display:inline-block;background:#00558F;color:#FFFFFF;text-decoration:none;font-size:14px;font-weight:700;padding:14px 36px;border-radius:8px;letter-spacing:0.5px;">
                 Call Patient
               </a>
@@ -257,7 +300,7 @@ class Safak_Ajax_Handler {
             <td style="background:#F8FAFD;border-top:1px solid #E8EFF6;padding:20px 40px;text-align:center;">
               <p style="margin:0;font-size:12px;color:#9AABBF;">
                 This notification was generated automatically by the Safak Medical consultation form plugin.<br>
-                IP (masked): {$ip}
+                IP (masked): {$esc_ip}
               </p>
             </td>
           </tr>
@@ -281,25 +324,9 @@ HTML;
 
     /** Retrieve the client IP from available server variables. */
     private static function get_client_ip(): string {
-        $candidates = [
-            'HTTP_CF_CONNECTING_IP',   // Cloudflare
-            'HTTP_X_FORWARDED_FOR',
-            'HTTP_X_REAL_IP',
-            'REMOTE_ADDR',
-        ];
-        foreach ( $candidates as $key ) {
-            if ( ! empty( $_SERVER[ $key ] ) ) {
-                $ip = sanitize_text_field( wp_unslash( $_SERVER[ $key ] ) );
-                // X-Forwarded-For can be a comma-separated list; take first.
-                if ( str_contains( $ip, ',' ) ) {
-                    $ip = trim( explode( ',', $ip )[0] );
-                }
-                if ( filter_var( $ip, FILTER_VALIDATE_IP ) ) {
-                    return $ip;
-                }
-            }
-        }
-        return '0.0.0.0';
+        // Unless we are strictly verifying Cloudflare headers in a known secure environment,
+        // we solely rely on REMOTE_ADDR to prevent attackers from spoofing headers like HTTP_X_FORWARDED_FOR.
+        return ! empty( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '0.0.0.0';
     }
 
     /**

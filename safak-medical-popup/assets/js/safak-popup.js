@@ -823,14 +823,8 @@
     }
 
     function setDefaultCountryForLang( lang ) {
+        // As requested, the default country flag is the Algerian one (+213) in all 3 languages
         let defCode = '+213', defName = 'Algeria', defFlag = '🇩🇿';
-        if ( lang === 'ar' ) {
-            defCode = '+213'; defName = 'Algeria'; defFlag = '🇩🇿';
-        } else if ( lang === 'fr' ) {
-            defCode = '+33'; defName = 'France'; defFlag = '🇫🇷';
-        } else if ( lang === 'en' ) {
-            defCode = '+44'; defName = 'United Kingdom'; defFlag = '🇬🇧';
-        }
         selectCountry( defCode, defName, defFlag, false );
     }
 

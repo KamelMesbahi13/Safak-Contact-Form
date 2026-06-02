@@ -137,6 +137,11 @@ HTML;
 
         <form id="safak-consultation-form" novalidate autocomplete="off">
 
+          <!-- Honeypot field to catch automated spam bots -->
+          <div style="display:none !important;">
+            <input type="text" name="safak_honeypot" value="" autocomplete="off" tabindex="-1" />
+          </div>
+
           <div class="safak-form__row safak-form__row--dual">
             <div class="safak-form__group">
               <label class="safak-form__label" for="safak-first-name" data-i18n="label_first_name">First Name</label>

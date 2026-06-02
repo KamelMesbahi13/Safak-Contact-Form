@@ -105,4 +105,19 @@ class Safak_Database {
             ARRAY_A
         );
     }
+
+    /**
+     * Delete submissions older than 30 days automatically.
+     * Called daily via WP Cron.
+     */
+    public static function delete_old_submissions(): void {
+        global $wpdb;
+
+        $table_name = $wpdb->prefix . SAFAK_POPUP_TABLE;
+
+        // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+        $wpdb->query(
+            "DELETE FROM {$table_name} WHERE submitted_at < DATE_SUB(NOW(), INTERVAL 30 DAY)"
+        );
+    }
 }

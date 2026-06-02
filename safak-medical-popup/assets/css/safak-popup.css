@@ -836,6 +836,7 @@
   background-color: var(--safak-white);
   transition: border-color 0.2s, box-shadow 0.2s;
   box-sizing: border-box;
+  direction: ltr !important; /* Force LTR layout for flag selector and input in all languages */
 }
 
 .safak-phone-wrapper:focus-within,
@@ -891,6 +892,14 @@
   line-height: 1;
   display: inline-flex;
   align-items: center;
+}
+
+.safak-country-selected-flag img {
+  border-radius: 2px !important;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.15) !important;
+  object-fit: cover !important;
+  display: inline-block !important;
+  vertical-align: middle !important;
 }
 
 .safak-country-btn-arrow {
@@ -1036,40 +1045,6 @@
 }
 
 /* ── 12. Dynamic RTL Overrides for Country Selector ──────────────────────── */
-.safak-modal[data-dir="rtl"] .safak-phone-wrapper {
-  flex-direction: row-reverse;
-}
-
-.safak-modal[data-dir="rtl"] .safak-country-btn {
-  border-right: none !important;
-  border-left: 1px solid var(--safak-input-border) !important;
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
-  border-top-right-radius: var(--safak-radius-sm) !important;
-  border-bottom-right-radius: var(--safak-radius-sm) !important;
-}
-
-.safak-modal[data-dir="rtl"] .safak-country-btn:hover,
-.safak-modal[data-dir="rtl"] .safak-country-btn:focus,
-.safak-modal[data-dir="rtl"] .safak-country-btn:active {
-  border: none !important;
-  border-left: 1px solid var(--safak-input-border) !important;
-}
-
-.safak-modal[data-dir="rtl"] .safak-phone-wrapper .safak-form__input {
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-  border-top-left-radius: var(--safak-radius-sm) !important;
-  border-bottom-left-radius: var(--safak-radius-sm) !important;
-  text-align: left;
-  direction: ltr; /* Keeps input LTR for phone numbers */
-}
-
-.safak-modal[data-dir="rtl"] .safak-country-dropdown {
-  left: auto;
-  right: 0;
-}
-
 .safak-modal[data-dir="rtl"] .safak-country-item {
   text-align: right;
   flex-direction: row-reverse;
