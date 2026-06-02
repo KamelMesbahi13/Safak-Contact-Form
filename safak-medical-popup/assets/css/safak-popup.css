@@ -1,0 +1,825 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Mako&display=swap');
+
+/*
+ * safak-popup.css
+ * Safak Medical – Redesigned Professional Widescreen Two-Column Modal
+ *
+ * Aesthetics: Highly professional, medical tourism portal, trust-focused.
+ * Layout: 2-column widescreen grid (Form on Left / Medical info & Trust on Right).
+ * Color Palette: Elegant blacks, light greys, pristine white, with high-end clinical details.
+ */
+
+/* ── 1. CSS Custom Properties (Design Tokens) ──────────────────────────────── */
+:root {
+  --safak-blue:          #111827; /* Turn all branding blue accents to rich black */
+  --safak-blue-dark:     #000000;
+  --safak-blue-light:    #F3F4F6; /* Elegant light grey instead of light blue */
+  --safak-red:           #D60A17;
+  --safak-white:         #FFFFFF;
+  --safak-bg:            #FAFBFD;
+  --safak-form-bg:       #F8F9FA;
+  --safak-text:          #111827; /* Deep rich black */
+  --safak-text-light:    #4B5563;
+  --safak-muted:         #9CA3AF;
+  --safak-border:        #E5E7EB;
+  --safak-input-border:  #D1D5DB;
+  --safak-shadow-soft:   0 30px 100px rgba(0, 0, 0, 0.16);
+  --safak-radius:        16px;
+  --safak-radius-sm:     8px;
+  --safak-transition:    0.28s cubic-bezier(0.4, 0, 0.2, 1);
+  --safak-font:          'Mako', 'Segoe UI', system-ui, sans-serif; /* Mako font for EN/FR */
+}
+
+/* ── 2. Overlay / Backdrop (Glassmorphism) ────────────────────────────────── */
+.safak-overlay {
+  position:         fixed;
+  inset:            0;
+  z-index:          999999;
+  background:       rgba(15, 23, 42, 0.55);
+  backdrop-filter:  blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  display:          flex;
+  align-items:      center;
+  justify-content:  center;
+  padding:          20px;
+  opacity:          0;
+  transition:       opacity var(--safak-transition);
+  box-sizing:       border-box;
+}
+
+.safak-overlay.is-visible {
+  opacity: 1;
+}
+
+.safak-overlay[hidden] {
+  display: none !important;
+}
+
+/* ── 3. Modal Shell ──────────────────────────────────────────────────────── */
+.safak-modal {
+  background:       var(--safak-white);
+  border-radius:    var(--safak-radius);
+  box-shadow:       var(--safak-shadow-soft);
+  width:            100%;
+  max-width:        960px; /* Widescreen two-column layout */
+  max-height:       90vh;
+  overflow:         hidden;
+  display:          flex;
+  flex-direction:   column;
+  position:         relative;
+  transform:        translateY(30px) scale(0.98);
+  transition:       transform var(--safak-transition);
+  font-family:      var(--safak-font);
+}
+
+.safak-overlay.is-visible .safak-modal {
+  transform: translateY(0) scale(1);
+}
+
+/* Container Split Grid */
+.safak-modal__container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  min-height: 520px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #D1D5DB transparent;
+}
+
+/* Custom thin scrollbar for a premium experience */
+.safak-modal__container::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+.safak-modal__container::-webkit-scrollbar-track {
+  background: transparent;
+}
+.safak-modal__container::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 10px;
+}
+.safak-modal__container::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+/* ── 4. Left Column (Form Card) ─────────────────────────────────────────── */
+.safak-modal__left {
+  flex: 1 1 50%;
+  background: var(--safak-form-bg);
+  padding: 44px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  border-right: 1px solid var(--safak-border);
+  position: relative;
+}
+
+/* Branding in Form - Always forced to LTR and Left Aligned */
+.safak-modal__branding {
+  display:     flex !important;
+  align-items: center !important;
+  gap:         12px !important;
+  margin-bottom: 28px !important;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.safak-modal__brand-text {
+  display:        flex !important;
+  flex-direction: column !important;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.safak-modal__brand-name {
+  color:          var(--safak-blue) !important; /* Resolves to black */
+  font-size:      17px !important;
+  font-weight:    700 !important;
+  letter-spacing: -0.3px !important;
+  line-height:    1.2 !important;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+.safak-modal__brand-tagline {
+  color:          var(--safak-text-light) !important;
+  font-size:      11.5px !important;
+  font-weight:    500 !important;
+  letter-spacing: 0.2px !important;
+  direction: ltr !important;
+  text-align: left !important;
+}
+
+/* Form structure */
+#safak-consultation-form {
+  display:        flex;
+  flex-direction: column;
+  gap:            16px;
+  width: 100%;
+}
+
+.safak-form__row--dual {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.safak-form__group {
+  display:        flex;
+  flex-direction: column;
+  gap:            6px;
+}
+
+.safak-form__label {
+  font-size:    13px;
+  font-weight:  600;
+  color:        var(--safak-text);
+  text-align: left;
+}
+
+.safak-form__input,
+.safak-form__textarea {
+  font-family:    var(--safak-font);
+  font-size:      14.5px;
+  color:          var(--safak-text) !important;
+  background:     var(--safak-white) !important;
+  border:         1px solid var(--safak-input-border);
+  border-radius:  var(--safak-radius-sm);
+  padding:        12px 14px;
+  width:          100%;
+  box-sizing:     border-box;
+  outline:        none;
+  transition:     border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+}
+
+/* Force inputs to have white background and prevent browser autofill green/yellow tints */
+.safak-form__input:-webkit-autofill,
+.safak-form__input:-webkit-autofill:hover, 
+.safak-form__input:-webkit-autofill:focus,
+.safak-form__textarea:-webkit-autofill,
+.safak-form__textarea:-webkit-autofill:hover,
+.safak-form__textarea:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px var(--safak-white) inset !important;
+  box-shadow: 0 0 0px 1000px var(--safak-white) inset !important;
+  -webkit-text-fill-color: var(--safak-text) !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.safak-form__input::placeholder,
+.safak-form__textarea::placeholder {
+  color:   #9CA3AF;
+}
+
+.safak-form__input:focus,
+.safak-form__textarea:focus {
+  border-color: #111827;
+  box-shadow:   0 0 0 3px rgba(17, 24, 39, 0.08);
+  background:   var(--safak-white) !important;
+}
+
+.safak-form__input.has-error,
+.safak-form__textarea.has-error {
+  border-color: var(--safak-red);
+  box-shadow:   0 0 0 3px rgba(214, 10, 23, 0.12);
+}
+
+.safak-form__textarea {
+  resize:     vertical;
+  min-height: 90px;
+}
+
+/* Phone icon styles removed as requested */
+
+/* Dynamic errors */
+.safak-form__error {
+  font-size:   11.5px;
+  color:       var(--safak-red);
+  font-weight: 500;
+  text-align:  left;
+  min-height:  0;
+  overflow:    hidden;
+  max-height:  0;
+  transition:  max-height 0.2s ease;
+}
+
+.safak-form__error.is-visible {
+  max-height: 20px;
+  margin-top: 2px;
+}
+
+/* Submit Button: Premium Brand Blue Clinical Gradient */
+.safak-form__submit {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             10px;
+  width:           100%;
+  background:      linear-gradient(135deg, #00558F 0%, #3B82F6 100%) !important;
+  color:           var(--safak-white) !important;
+  font-size:       14.5px;
+  font-weight:     700;
+  border:          none;
+  border-radius:   50px; /* Pill-shaped */
+  padding:         13px 28px;
+  cursor:          pointer;
+  transition:      transform var(--safak-transition), box-shadow var(--safak-transition), opacity var(--safak-transition);
+  box-shadow:      0 4px 14px rgba(0, 85, 143, 0.35);
+  margin-top:      10px;
+  line-height:     1.2;
+}
+
+.safak-form__submit:hover:not(:disabled) {
+  transform:   translateY(-1.5px);
+  box-shadow:  0 6px 20px rgba(0, 85, 143, 0.45);
+}
+
+.safak-form__submit:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.safak-form__submit:disabled {
+  opacity: 0.75;
+  cursor:  not-allowed;
+}
+
+.safak-submit__spinner {
+  display:       none;
+  width:         18px;
+  height:        18px;
+  border:        2px solid rgba(255,255,255,0.35);
+  border-top-color: var(--safak-white);
+  border-radius: 50%;
+  animation:     safak-spin 0.6s linear infinite;
+}
+
+.safak-form__submit.is-loading .safak-submit__spinner {
+  display: block;
+}
+
+/* Disclaimer text under submit button */
+.safak-form__disclaimer {
+  font-size: 11px;
+  color: var(--safak-text-light);
+  line-height: 1.45;
+  margin: 12px 0 0;
+  text-align: center;
+}
+
+/* ── 5. Right Column (Branding & Trust Column) ──────────────────────────── */
+.safak-modal__right {
+  flex: 1 1 50%;
+  background: var(--safak-white);
+  padding: 44px 40px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  position: relative;
+}
+
+/* Language controls (Placed under the branding in left column) */
+.safak-modal__controls {
+  align-self: flex-start;
+  margin-bottom: 20px;
+}
+
+.safak-lang-switcher {
+  display:     flex;
+  align-items: center;
+  gap:         2px;
+  background:  var(--safak-form-bg);
+  border:      1px solid var(--safak-border);
+  border-radius: 50px;
+  padding:     4px;
+}
+
+.safak-lang-btn {
+  font-size:      11px;
+  font-weight:    700;
+  color:          var(--safak-text-light);
+  background:     transparent;
+  border:         none;
+  padding:        5px 12px;
+  border-radius:  50px;
+  cursor:         pointer;
+  transition:     background var(--safak-transition), color var(--safak-transition);
+  display:        inline-flex;
+  align-items:    center;
+  gap:            6px;
+  line-height:    1;
+}
+
+.safak-lang-btn:hover {
+  color: #111827;
+}
+
+.safak-lang-btn.active {
+  color:       var(--safak-white);
+  background:  #111827; /* Turn active button black instead of blue */
+}
+
+.safak-lang-btn.active .safak-flag-icon {
+  box-shadow:  0 1px 3px rgba(0,0,0,0.3);
+}
+
+.safak-flag-icon {
+  width:          16px;
+  height:         11px;
+  border-radius:  1.5px;
+  object-fit:     cover;
+  display:        inline-block;
+  vertical-align: middle;
+  box-shadow:     0 1px 2px rgba(0,0,0,0.15);
+  flex-shrink:    0;
+}
+
+.safak-lang-divider {
+  color:       var(--safak-border);
+  font-size:   10px;
+  user-select: none;
+}
+
+/* Floating Close X Button: Perfect borderless circle and absolutely NO rotation */
+.safak-modal__close {
+  position:        absolute;
+  top:             20px;
+  right:           20px;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           30px;
+  height:          30px;
+  background:      #F3F4F6; /* Solid light circle */
+  border:          none; /* Borderless circle */
+  border-radius:   50%;
+  color:           #4B5563;
+  cursor:          pointer;
+  transition:      background var(--safak-transition), color var(--safak-transition);
+  z-index:         10;
+  box-shadow:      0 2px 8px rgba(0,0,0,0.06);
+}
+
+.safak-modal__close:hover {
+  background: #E5E7EB; /* Subtle darker hover circle */
+  color: #111827;
+  /* Rotation transform completely removed as requested */
+}
+
+/* Right Content Main Column */
+.safak-right__content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  height: 100%;
+}
+
+/* Dynamic Pill Badge: Neutral light grey background instead of blue */
+.safak-badge-pill {
+  display: inline-block;
+  background: var(--safak-blue-light); /* Evaluates to soft grey */
+  color: var(--safak-blue); /* Evaluates to rich black */
+  font-size: 11.5px;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 50px;
+  margin-bottom: 18px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid var(--safak-border);
+}
+
+/* Main bold header */
+.safak-right__heading {
+  font-size:      30px;
+  font-weight:    800;
+  color:          var(--safak-text);
+  line-height:    1.25;
+  margin:         0 0 12px;
+  letter-spacing: -0.8px;
+}
+
+/* Description subtext */
+.safak-right__subtext {
+  font-size:   14px;
+  color:       var(--safak-text-light);
+  line-height: 1.55;
+  margin:      0 0 24px;
+}
+
+/* Checklist services */
+.safak-right__list {
+  list-style: none;
+  padding:    0;
+  margin:     0 0 32px;
+  display:    flex;
+  flex-direction: column;
+  gap:        14px;
+}
+
+.safak-right__list li {
+  display:     flex;
+  align-items: flex-start;
+  gap:         12px;
+  font-size:   14px;
+  color:       var(--safak-text);
+  line-height: 1.45;
+}
+
+.safak-list__check {
+  color:       #10B981;
+  font-weight: 800;
+  font-size:   16px;
+  line-height: 1;
+}
+
+/* Trusted partners section */
+.safak-right__trusted {
+  margin-top:  30px;
+  width:       100%;
+  border-top:  1px solid var(--safak-border);
+  padding-top: 24px;
+}
+
+.safak-trusted__title {
+  font-size:      11px;
+  font-weight:    700;
+  color:          var(--safak-muted);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  display:        block;
+  margin-bottom:  12px;
+}
+
+.safak-trusted__logos {
+  display:         flex;
+  align-items:     center;
+  justify-content: center; /* Centers the 2 logos in the second row */
+  flex-wrap:       wrap;
+  gap:             16px 20px;
+  margin-top:      16px;
+}
+
+.safak-trusted__logo-img {
+  flex:            0 0 28%; /* Forces exactly 3 per row on desktop */
+  height:          32px; /* Bigger height */
+  width:           auto;
+  max-width:       95px;
+  object-fit:      contain;
+  opacity:         1; /* Original colors, no opacity reduction */
+  filter:          none; /* No grayscale */
+  transition:      transform var(--safak-transition);
+}
+
+.safak-trusted__logo-img:hover {
+  transform:       scale(1.05); /* Sleek hover scale */
+}
+
+@media (max-width: 540px) {
+  .safak-trusted__logo-img {
+    flex:          0 0 40% !important; /* 2 per row on small screens */
+    max-width:     80px !important;
+    height:        28px !important;
+  }
+}
+
+/* ── 6. Success / Error Feedback Panels (Clean design overlay) ───────────── */
+.safak-feedback {
+  position:       absolute;
+  inset:          0;
+  background:     var(--safak-form-bg);
+  display:        none;
+  flex-direction: column;
+  align-items:    center;
+  justify-content: center;
+  text-align:     center;
+  padding:        30px;
+  gap:            12px;
+  z-index:        5;
+}
+
+.safak-feedback:not([hidden]) {
+  display: flex;
+}
+
+.safak-feedback__icon {
+  width:           60px;
+  height:          60px;
+  border-radius:   50%;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  animation:       safak-spin 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+}
+
+.safak-feedback--success .safak-feedback__icon {
+  background: rgba(16, 185, 129, 0.1);
+  color:      #10B981;
+}
+
+.safak-feedback--error .safak-feedback__icon {
+  background: rgba(214, 10, 23, 0.1);
+  color:      var(--safak-red);
+}
+
+.safak-feedback__title {
+  margin:      0;
+  font-size:   20px;
+  font-weight: 700;
+  color:       var(--safak-text);
+}
+
+.safak-feedback__msg {
+  margin:      0;
+  font-size:   14px;
+  color:       var(--safak-text-light);
+  max-width:   300px;
+  line-height: 1.5;
+}
+
+/* ── 7. Dynamic RTL Overrides (data-dir="rtl") ───────────────────────────── */
+
+.safak-modal[data-dir="rtl"] {
+  direction: rtl;
+  font-family: 'Tajawal', sans-serif; /* Dynamic Arabic Font Match */
+}
+
+/* RTL Branding Override - align to the right in Arabic to avoid close button overlap */
+.safak-modal[data-dir="rtl"] .safak-modal__branding {
+  direction: rtl !important;
+  text-align: right !important;
+  align-items: flex-start !important;
+}
+
+.safak-modal[data-dir="rtl"] .safak-modal__brand-text {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.safak-modal[data-dir="rtl"] .safak-modal__brand-name {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+.safak-modal[data-dir="rtl"] .safak-modal__brand-tagline {
+  direction: rtl !important;
+  text-align: right !important;
+}
+
+/* Align switcher controls to the right in Arabic */
+.safak-modal[data-dir="rtl"] .safak-modal__controls {
+  align-self: flex-end !important;
+}
+
+/* Split Columns swap */
+.safak-modal[data-dir="rtl"] .safak-modal__container {
+  flex-direction: row-reverse;
+}
+
+/* Invert borders */
+.safak-modal[data-dir="rtl"] .safak-modal__left {
+  border-right: none;
+  border-left: 1px solid var(--safak-border);
+}
+
+/* Form cursor alignment */
+.safak-modal[data-dir="rtl"] .safak-form__label {
+  text-align: right;
+}
+
+.safak-modal[data-dir="rtl"] .safak-form__input,
+.safak-modal[data-dir="rtl"] .safak-form__textarea {
+  text-align: right;
+  direction: rtl;
+}
+
+/* Phone RTL settings removed */
+
+.safak-modal[data-dir="rtl"] .safak-form__error {
+  text-align: right;
+}
+
+/* Close Button Position Swap in RTL */
+.safak-modal[data-dir="rtl"] .safak-modal__close {
+  right: auto;
+  left: 20px;
+}
+
+/* Right content texts alignment */
+.safak-modal[data-dir="rtl"] .safak-right__content {
+  align-items: flex-start;
+  text-align: right;
+  width: 100%;
+}
+
+.safak-modal[data-dir="rtl"] .safak-right__list li {
+  text-align: right;
+}
+
+.safak-modal[data-dir="rtl"] .safak-list__check {
+  margin-right: 0;
+  margin-left: 4px;
+}
+
+/* Language selector handles left-to-right numbers */
+.safak-modal[data-dir="rtl"] .safak-lang-switcher {
+  direction: ltr;
+}
+
+/* ── 8. Animations ───────────────────────────────────────────────────────── */
+@keyframes safak-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes safak-fade-up {
+  from {
+    opacity:   0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity:   1;
+    transform: translateY(0);
+  }
+}
+
+.safak-feedback:not([hidden]) {
+  animation: safak-fade-up 0.35s ease both;
+}
+
+/* ── 9. Responsive & Mobile Optimization (Media Queries) ─────────────────── */
+@media (max-width: 900px) {
+  .safak-overlay {
+    padding: 16px !important;
+  }
+
+  .safak-modal {
+    max-width: 520px;
+    max-height: 90vh !important;
+  }
+
+  .safak-modal__container {
+    flex-direction: column !important; /* Stack vertically */
+  }
+
+  .safak-modal__left {
+    flex: 1 0 auto;
+    border-right: none !important;
+    border-bottom: 1px solid var(--safak-border);
+    padding: 36px 30px;
+  }
+
+  .safak-modal__right {
+    flex: 1 0 auto;
+    padding: 36px 30px;
+  }
+
+  .safak-right__content {
+    align-items: center !important;
+    text-align: center !important;
+  }
+
+  .safak-right__list {
+    align-items: center;
+  }
+
+  .safak-right__heading {
+    font-size: 24px;
+  }
+
+  /* Close Button moves to absolute relative layout */
+  .safak-modal__close {
+    top: 12px;
+    right: 12px;
+  }
+  .safak-modal[data-dir="rtl"] .safak-modal__close {
+    left: 12px;
+    right: auto;
+  }
+}
+
+@media (max-width: 540px) {
+  .safak-overlay {
+    padding: 16px 12px !important;
+  }
+
+  .safak-modal {
+    max-height: 88vh !important;
+  }
+
+  .safak-form__row--dual {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .safak-modal__left,
+  .safak-modal__right {
+    padding: 28px 20px;
+  }
+
+  .safak-right__heading {
+    font-size: 20px;
+  }
+
+  .safak-trusted__logos {
+    justify-content: center;
+  }
+}
+
+/* ── 10. WhatsApp CTA Section ───────────────────────────────────────────── */
+.safak-whatsapp-cta {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  width: 100%;
+}
+
+.safak-whatsapp-cta__prompt {
+  font-size: 11.5px;
+  color: var(--safak-text-light);
+  margin: 0;
+  text-align: center;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.safak-whatsapp-cta__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, #128C7E 0%, #25D366 100%) !important;
+  color: var(--safak-white) !important;
+  font-size: 14.5px;
+  font-weight: 700;
+  border: none;
+  border-radius: 50px;
+  padding: 13px 28px;
+  width: 100%;
+  box-sizing: border-box;
+  text-decoration: none !important;
+  transition: transform var(--safak-transition), box-shadow var(--safak-transition);
+  box-shadow: 0 4px 12px rgba(37, 211, 102, 0.22);
+  cursor: pointer;
+  line-height: 1.2;
+}
+
+.safak-whatsapp-cta__btn:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 18px rgba(37, 211, 102, 0.32);
+}
+
+.safak-whatsapp-cta__btn:active {
+  transform: translateY(0);
+}
+
+.safak-whatsapp-cta__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
