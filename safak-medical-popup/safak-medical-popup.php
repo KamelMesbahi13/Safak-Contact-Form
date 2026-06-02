@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Plugin Constants ────────────────────────────────────────────────────────
-define( 'SAFAK_POPUP_VERSION',   '1.0.0' );
+define( 'SAFAK_POPUP_VERSION',   '1.0.3' );
 define( 'SAFAK_POPUP_FILE',      __FILE__ );
 define( 'SAFAK_POPUP_DIR',       plugin_dir_path( __FILE__ ) );
 define( 'SAFAK_POPUP_URL',       plugin_dir_url( __FILE__ ) );
@@ -91,6 +91,23 @@ final class Safak_Medical_Popup {
             true                   // Load in footer.
         );
 
+        // Prevent any performance/caching plugin from deferring this script.
+        add_filter( 'script_loader_tag', function( $tag, $handle ) {
+            if ( $handle === 'safak-popup-script' ) {
+                // Remove any defer/async already added by other optimizers.
+                $tag = str_replace( array( ' defer', ' async', ' defer="defer"', ' async="async"' ), '', $tag );
+            }
+            return $tag;
+        }, 99999, 2 );
+
+        $current_lang = 'en';
+        $locale       = get_locale();
+        if ( strpos( $locale, 'ar' ) === 0 ) {
+            $current_lang = 'ar';
+        } elseif ( strpos( $locale, 'fr' ) === 0 ) {
+            $current_lang = 'fr';
+        }
+
         /**
          * Pass PHP-side configuration to JavaScript via wp_localize_script.
          * This keeps the nonce and AJAX URL server-generated and secure.
@@ -99,10 +116,11 @@ final class Safak_Medical_Popup {
             'safak-popup-script',
             'SafakPopup',          // Global JS object name.
             [
-                'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-                'nonce'   => wp_create_nonce( 'safak_popup_nonce' ),
-                'logoUrl' => SAFAK_POPUP_ASSETS . 'images/logo-white-1.webp',
-                'action'  => 'safak_submit_form',
+                'ajaxUrl'     => admin_url( 'admin-ajax.php' ),
+                'nonce'       => wp_create_nonce( 'safak_popup_nonce' ),
+                'logoUrl'     => SAFAK_POPUP_ASSETS . 'images/logo-white-1.webp',
+                'action'      => 'safak_submit_form',
+                'currentLang' => $current_lang,
             ]
         );
     }

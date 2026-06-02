@@ -27,7 +27,7 @@
     }
 
     // ── State ────────────────────────────────────────────────────────────────
-    let currentLang   = 'en';
+    let currentLang   = ( window.SafakPopup && SafakPopup.currentLang ) ? SafakPopup.currentLang : 'en';
     let isSubmitting  = false;
     let triggerButton = null;   // Element that opened the modal (for focus return).
 
@@ -65,9 +65,9 @@
         // ── Event Listeners ──────────────────────────────────────────────────
 
         // Robust Event Delegation: Listen for clicks on any element with .safak-popup-trigger,
-        // ID safak-open-popup, or anchor tags linking to #safak-popup.
+        // ID safak-open-popup, or anchor tags linking to #safak-popup (supporting subfolders).
         document.addEventListener( 'click', function ( e ) {
-            const trigger = e.target.closest( '.safak-popup-trigger, #safak-open-popup, a[href="#safak-popup"]' );
+            const trigger = e.target.closest( '.safak-popup-trigger, #safak-open-popup, a[href$="#safak-popup"]' );
             if ( trigger ) {
                 e.preventDefault();
                 openModal( trigger );
@@ -126,6 +126,30 @@
                 }
             }
         };
+
+        // ── Hash-based trigger ────────────────────────────────────────────────
+        // If the page loaded with #safak-popup in the URL (e.g. from a
+        // multilingual menu link like /fr/accueil/#safak-popup), open the modal
+        // immediately and silently clean the hash from the address bar.
+        function checkAndOpenFromHash() {
+            if ( window.location.hash === '#safak-popup' ) {
+                // Clean the URL without reloading the page.
+                if ( window.history && window.history.replaceState ) {
+                    window.history.replaceState(
+                        null,
+                        document.title,
+                        window.location.pathname + window.location.search
+                    );
+                }
+                openModal( null );
+            }
+        }
+
+        // Check on initial load.
+        checkAndOpenFromHash();
+
+        // Also listen for hash changes (SPA / Elementor smooth scroll scenarios).
+        window.addEventListener( 'hashchange', checkAndOpenFromHash );
     }
 
     // ── Modal Open / Close ───────────────────────────────────────────────────
