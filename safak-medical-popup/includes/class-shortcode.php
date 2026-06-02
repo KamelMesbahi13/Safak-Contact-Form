@@ -172,14 +172,18 @@ HTML;
             <div class="safak-phone-wrapper">
               <div class="safak-country-dropdown-container">
                 <button type="button" class="safak-country-btn" id="safak-country-toggle" aria-haspopup="listbox" aria-expanded="false">
-                  <span class="safak-country-selected-flag">🇩🇿</span>
-                  <span class="safak-country-selected-code">+213</span>
+                  <span class="safak-country-selected-flag">
+                    <img src="https://flagcdn.com/20x15/dz.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;" />
+                  </span>
                   <span class="safak-country-btn-arrow">
-                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                    <svg width="8" height="5" viewBox="0 0 8 5" fill="currentColor" style="display:inline-block;vertical-align:middle;margin-left:4px;"><path d="M0 0h8L4 5z"/></svg>
                   </span>
                 </button>
                 <div class="safak-country-dropdown" id="safak-country-menu" role="listbox" hidden>
                   <div class="safak-country-search-wrapper">
+                    <span class="safak-country-search-icon">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block;vertical-align:middle;color:#9ca3af;"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    </span>
                     <input type="text" class="safak-country-search" id="safak-country-search" data-i18n-placeholder="placeholder_search" autocomplete="off" />
                   </div>
                   <div class="safak-country-list" id="safak-country-list">
@@ -192,7 +196,7 @@ HTML;
                 id="safak-phone"
                 name="phone"
                 class="safak-form__input"
-                data-i18n-placeholder="placeholder_phone"
+                placeholder="+213"
                 required
                 autocomplete="tel"
               />

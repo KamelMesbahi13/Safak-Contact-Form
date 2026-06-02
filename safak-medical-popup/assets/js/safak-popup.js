@@ -775,10 +775,9 @@
             const iso = flagEmojiToISO( c.flag );
             item.innerHTML = `
                 <span class="safak-country-item-flag">
-                    <img src="https://flagcdn.com/20x15/${iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,0.15);" />
+                    <img src="https://flagcdn.com/20x15/${iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;" />
                 </span>
-                <span class="safak-country-item-name">${c.name}</span>
-                <span class="safak-country-item-code">${c.code}</span>
+                <span class="safak-country-item-text">${c.name} (${c.code})</span>
             `;
             
             item.addEventListener( 'click', function () {
@@ -801,12 +800,15 @@
         
         if ( countryToggleBtn ) {
             const flagEl = countryToggleBtn.querySelector( '.safak-country-selected-flag' );
-            const codeEl = countryToggleBtn.querySelector( '.safak-country-selected-code' );
             if ( flagEl ) {
                 const iso = flagEmojiToISO( flag );
-                flagEl.innerHTML = `<img src="https://flagcdn.com/20x15/${iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,0.15);" />`;
+                flagEl.innerHTML = `<img src="https://flagcdn.com/20x15/${iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;" />`;
             }
-            if ( codeEl ) codeEl.textContent = code;
+        }
+        
+        const phoneInput = document.getElementById( 'safak-phone' );
+        if ( phoneInput ) {
+            phoneInput.placeholder = code;
         }
         
         if ( countryListContainer ) {
@@ -845,6 +847,10 @@
         if ( ! countryMenu ) return;
         countryMenu.hidden = false;
         countryToggleBtn.setAttribute( 'aria-expanded', 'true' );
+        const wrapper = countryToggleBtn.closest( '.safak-phone-wrapper' );
+        if ( wrapper ) {
+            wrapper.classList.add( 'is-open' );
+        }
         if ( countrySearchInput ) {
             countrySearchInput.value = '';
             countrySearchInput.focus();
@@ -856,6 +862,10 @@
         if ( ! countryMenu ) return;
         countryMenu.hidden = true;
         countryToggleBtn.setAttribute( 'aria-expanded', 'false' );
+        const wrapper = countryToggleBtn.closest( '.safak-phone-wrapper' );
+        if ( wrapper ) {
+            wrapper.classList.remove( 'is-open' );
+        }
     }
 
     function filterCountries( query ) {
