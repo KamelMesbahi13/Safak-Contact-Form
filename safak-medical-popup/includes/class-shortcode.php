@@ -169,15 +169,34 @@ HTML;
 
           <div class="safak-form__group">
             <label class="safak-form__label" for="safak-phone" data-i18n="label_phone">Phone Number</label>
-            <input
-              type="tel"
-              id="safak-phone"
-              name="phone"
-              class="safak-form__input"
-              data-i18n-placeholder="placeholder_phone"
-              required
-              autocomplete="tel"
-            />
+            <div class="safak-phone-wrapper">
+              <div class="safak-country-dropdown-container">
+                <button type="button" class="safak-country-btn" id="safak-country-toggle" aria-haspopup="listbox" aria-expanded="false">
+                  <span class="safak-country-selected-flag">🇩🇿</span>
+                  <span class="safak-country-selected-code">+213</span>
+                  <span class="safak-country-btn-arrow">
+                    <svg width="10" height="6" viewBox="0 0 10 6" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 1l4 4 4-4"/></svg>
+                  </span>
+                </button>
+                <div class="safak-country-dropdown" id="safak-country-menu" role="listbox" hidden>
+                  <div class="safak-country-search-wrapper">
+                    <input type="text" class="safak-country-search" id="safak-country-search" data-i18n-placeholder="placeholder_search" autocomplete="off" />
+                  </div>
+                  <div class="safak-country-list" id="safak-country-list">
+                    <!-- JS populated -->
+                  </div>
+                </div>
+              </div>
+              <input
+                type="tel"
+                id="safak-phone"
+                name="phone"
+                class="safak-form__input"
+                data-i18n-placeholder="placeholder_phone"
+                required
+                autocomplete="tel"
+              />
+            </div>
             <span class="safak-form__error" data-field="phone" data-i18n="error_required" aria-live="polite"></span>
           </div>
 
@@ -189,7 +208,9 @@ HTML;
               class="safak-form__textarea"
               rows="4"
               data-i18n-placeholder="placeholder_message"
+              required
             ></textarea>
+            <span class="safak-form__error" data-field="message" data-i18n="error_required" aria-live="polite"></span>
           </div>
 
           <!-- Hidden language field – updated by JS -->
@@ -308,12 +329,16 @@ HTML;
                 'placeholder_first_name' => 'First Name',
                 'placeholder_last_name'  => 'Last Name',
                 'placeholder_phone'      => 'Enter Your Number..',
+                'placeholder_search'     => 'Search country...',
                 'placeholder_message'    => 'Type your message...',
                 'btn_submit'           => 'Send Message',
                 'btn_whatsapp'         => 'Start WhatsApp Chat',
                 'whatsapp_prompt'      => 'Have a question or request? Connect with us directly:',
                 'error_required'       => 'This field is required.',
                 'error_phone_format'   => 'Please enter a valid phone number.',
+                'error_min_name'       => 'Minimum 2 characters required.',
+                'error_min_phone'      => 'Minimum 6 digits required.',
+                'error_min_message'    => 'Minimum 5 characters required.',
                 'success_title'        => 'Request Received!',
                 'success_msg'          => 'Thank you. Our medical team will contact you within 24 hours.',
                 'error_title'          => 'Something went wrong',
@@ -340,12 +365,16 @@ HTML;
                 'placeholder_first_name' => 'Prénom',
                 'placeholder_last_name'  => 'Nom',
                 'placeholder_phone'      => 'Entrez Votre Numéro..',
+                'placeholder_search'     => 'Rechercher un pays...',
                 'placeholder_message'    => 'Tapez votre message...',
                 'btn_submit'           => 'Envoyer le Message',
                 'btn_whatsapp'         => 'Discuter sur WhatsApp',
                 'whatsapp_prompt'      => 'Vous avez des questions ou des demandes ? Contactez-nous directly :',
                 'error_required'       => 'Ce champ est obligatoire.',
                 'error_phone_format'   => 'Veuillez entrer un numéro de téléphone valide.',
+                'error_min_name'       => 'Minimum 2 caractères requis.',
+                'error_min_phone'      => 'Minimum 6 chiffres requis.',
+                'error_min_message'    => 'Minimum 5 caractères requis.',
                 'success_title'        => 'Demande reçue !',
                 'success_msg'          => 'Merci. Notre équipe médicale vous contactera sous 24 heures.',
                 'error_title'          => 'Une erreur est survenue',
@@ -372,12 +401,16 @@ HTML;
                 'placeholder_first_name' => 'الاسم الأول',
                 'placeholder_last_name'  => 'اسم العائلة',
                 'placeholder_phone'      => 'أدخل رقم هاتفك..',
+                'placeholder_search'     => 'ابحث عن بلد...',
                 'placeholder_message'    => 'اكتب رسالتك هنا...',
                 'btn_submit'           => 'إرسال الرسالة',
                 'btn_whatsapp'         => 'تواصل عبر واتساب',
                 'whatsapp_prompt'      => 'هل لديك أي استفسار أو طلب خاص؟ تواصل معنا مباشرة:',
                 'error_required'       => 'هذا الحقل مطلوب.',
                 'error_phone_format'   => 'يرجى إدخال رقم هاتف صحيح.',
+                'error_min_name'       => 'يجب إدخال حرفين على الأقل.',
+                'error_min_phone'      => 'يجب إدخال 6 أرقام على الأقل.',
+                'error_min_message'    => 'يجب إدخال 5 أحرف على الأقل.',
                 'success_title'        => 'تم استلام طلبك!',
                 'success_msg'          => 'شكراً لك. سيتواصل معك فريقنا الطبي الاستشاري خلال 24 ساعة.',
                 'error_title'          => 'حدث خطأ ما',

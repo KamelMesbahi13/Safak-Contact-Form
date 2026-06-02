@@ -823,3 +823,223 @@
   justify-content: center;
   flex-shrink: 0;
 }
+
+/* ── 11. Custom Country Dropdown Code Selector ───────────────────────────── */
+.safak-phone-wrapper {
+  display: flex;
+  position: relative;
+  gap: 0;
+  width: 100%;
+}
+
+.safak-country-dropdown-container {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.safak-country-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: var(--safak-white);
+  border: 1px solid var(--safak-input-border);
+  border-right: none;
+  border-top-left-radius: var(--safak-radius-sm);
+  border-bottom-left-radius: var(--safak-radius-sm);
+  padding: 0 12px;
+  height: 45px;
+  min-width: 85px;
+  cursor: pointer;
+  box-sizing: border-box;
+  font-family: var(--safak-font);
+  font-size: 14.5px;
+  color: var(--safak-text);
+  transition: background-color 0.2s, border-color 0.2s;
+  outline: none;
+}
+
+.safak-country-btn:hover {
+  background-color: var(--safak-blue-light);
+}
+
+.safak-country-btn:focus {
+  border-color: #111827;
+  z-index: 2;
+}
+
+.safak-country-selected-flag {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.safak-country-selected-code {
+  font-weight: 600;
+}
+
+.safak-country-btn-arrow {
+  display: flex;
+  align-items: center;
+  color: var(--safak-muted);
+  transition: transform 0.2s;
+}
+
+.safak-country-btn[aria-expanded="true"] .safak-country-btn-arrow {
+  transform: rotate(180deg);
+}
+
+/* Ensure the text phone input merges perfectly with the button */
+.safak-phone-wrapper .safak-form__input {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+  flex-grow: 1;
+}
+
+/* Glassmorphic Dropdown List */
+.safak-country-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  width: 280px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--safak-border);
+  border-radius: var(--safak-radius-sm);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-sizing: border-box;
+  animation: safak-fade-up 0.2s ease;
+}
+
+.safak-country-dropdown[hidden] {
+  display: none !important;
+}
+
+.safak-country-search-wrapper {
+  padding: 8px;
+  border-bottom: 1px solid var(--safak-border);
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.safak-country-search {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid var(--safak-input-border);
+  border-radius: 6px;
+  font-family: var(--safak-font);
+  font-size: 13px;
+  outline: none;
+  box-sizing: border-box;
+  background: var(--safak-white);
+  color: var(--safak-text);
+}
+
+.safak-country-search:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.05);
+}
+
+.safak-country-list {
+  max-height: 180px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #D1D5DB transparent;
+  padding: 4px 0;
+}
+
+.safak-country-list::-webkit-scrollbar {
+  width: 4px;
+}
+.safak-country-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+.safak-country-list::-webkit-scrollbar-thumb {
+  background: #D1D5DB;
+  border-radius: 10px;
+}
+.safak-country-list::-webkit-scrollbar-thumb:hover {
+  background: #9CA3AF;
+}
+
+.safak-country-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  font-size: 13.5px;
+  color: var(--safak-text);
+  cursor: pointer;
+  transition: background-color 0.15s;
+  text-align: left;
+  user-select: none;
+}
+
+.safak-country-item:hover {
+  background-color: var(--safak-blue-light);
+}
+
+.safak-country-item.active {
+  background-color: rgba(17, 24, 39, 0.05);
+  font-weight: 600;
+}
+
+.safak-country-item-flag {
+  font-size: 16px;
+}
+
+.safak-country-item-name {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.safak-country-item-code {
+  color: var(--safak-text-light);
+  font-weight: 500;
+  font-size: 12.5px;
+}
+
+/* ── 12. Dynamic RTL Overrides for Country Selector ──────────────────────── */
+.safak-modal[data-dir="rtl"] .safak-phone-wrapper {
+  flex-direction: row-reverse;
+}
+
+.safak-modal[data-dir="rtl"] .safak-country-btn {
+  border-left: 1px solid var(--safak-input-border);
+  border-right: 1px solid var(--safak-input-border);
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-top-right-radius: var(--safak-radius-sm);
+  border-bottom-right-radius: var(--safak-radius-sm);
+}
+
+.safak-modal[data-dir="rtl"] .safak-phone-wrapper .safak-form__input {
+  border-top-right-radius: 0 !important;
+  border-bottom-right-radius: 0 !important;
+  border-top-left-radius: var(--safak-radius-sm) !important;
+  border-bottom-left-radius: var(--safak-radius-sm) !important;
+  text-align: left;
+  direction: ltr; /* Keeps input LTR for phone numbers */
+}
+
+.safak-modal[data-dir="rtl"] .safak-country-dropdown {
+  left: auto;
+  right: 0;
+}
+
+.safak-modal[data-dir="rtl"] .safak-country-item {
+  text-align: right;
+  flex-direction: row-reverse;
+}
+
+.safak-modal[data-dir="rtl"] .safak-country-item-name {
+  text-align: right;
+}
+

@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Safak_Ajax_Handler {
 
     /** Recipient email for all consultation notifications. */
-    const NOTIFY_EMAIL = 'manager.safakmedical@gmail.com';
+    const NOTIFY_EMAIL = 'kmlmes13@gmail.com';
 
     /** Register both logged-in and guest AJAX actions. */
     public static function init(): void {
@@ -40,24 +40,29 @@ class Safak_Ajax_Handler {
         }
 
         // ── 2. Sanitise & Validate ───────────────────────────────────────────
-        $first_name = sanitize_text_field( wp_unslash( $_POST['first_name'] ?? '' ) );
-        $last_name  = sanitize_text_field( wp_unslash( $_POST['last_name']  ?? '' ) );
-        $phone      = sanitize_text_field( wp_unslash( $_POST['phone']      ?? '' ) );
-        $message    = sanitize_textarea_field( wp_unslash( $_POST['message'] ?? '' ) );
-        $language   = sanitize_text_field( wp_unslash( $_POST['language']   ?? 'en' ) );
+        $first_name       = sanitize_text_field( wp_unslash( $_POST['first_name']       ?? '' ) );
+        $last_name        = sanitize_text_field( wp_unslash( $_POST['last_name']        ?? '' ) );
+        $phone            = sanitize_text_field( wp_unslash( $_POST['phone']            ?? '' ) );
+        $country_name     = sanitize_text_field( wp_unslash( $_POST['country_name']     ?? '' ) );
+        $country_code     = sanitize_text_field( wp_unslash( $_POST['country_code']     ?? '' ) );
+        $country_flag     = sanitize_text_field( wp_unslash( $_POST['country_flag']     ?? '' ) );
+        $country_flag_iso = sanitize_text_field( wp_unslash( $_POST['country_flag_iso'] ?? '' ) );
+        $message          = sanitize_textarea_field( wp_unslash( $_POST['message']      ?? '' ) );
+        $language         = sanitize_text_field( wp_unslash( $_POST['language']         ?? 'en' ) );
 
         // Whitelist language values.
         if ( ! in_array( $language, [ 'en', 'fr', 'ar' ], true ) ) {
             $language = 'en';
         }
 
-        // Required field validation.
+        // Required & min character validation to prevent spam (First/Last name: min 2, Phone: min 6, Message: min 5).
         $errors = [];
-        if ( empty( $first_name ) ) { $errors[] = 'first_name'; }
-        if ( empty( $last_name ) )  { $errors[] = 'last_name'; }
-        if ( empty( $phone ) )      { $errors[] = 'phone'; }
+        if ( empty( $first_name ) || mb_strlen( trim( $first_name ) ) < 2 ) { $errors[] = 'first_name'; }
+        if ( empty( $last_name )  || mb_strlen( trim( $last_name ) ) < 2 )  { $errors[] = 'last_name'; }
+        if ( empty( $phone )      || mb_strlen( trim( $phone ) ) < 6 )      { $errors[] = 'phone'; }
+        if ( empty( $message )    || mb_strlen( trim( $message ) ) < 5 )    { $errors[] = 'message'; }
 
-        // Basic phone sanity check – allow digits, +, -, spaces, parentheses.
+        // Basic phone sanity check – allow digits, +, -, spaces, parentheses (6 to 25 characters).
         if ( ! empty( $phone ) && ! preg_match( '/^[0-9\+\-\s\(\)]{6,25}$/', $phone ) ) {
             $errors[] = 'phone_format';
         }
@@ -70,11 +75,14 @@ class Safak_Ajax_Handler {
         $raw_ip    = self::get_client_ip();
         $ip_masked = self::mask_ip( $raw_ip );
 
+        // Construct full combined phone number for database and default logging
+        $full_phone = trim( $country_code . ' ' . $phone );
+
         // ── 4. Log to Database ───────────────────────────────────────────────
         $row_id = Safak_Database::insert_submission( [
             'first_name' => $first_name,
             'last_name'  => $last_name,
-            'phone'      => $phone,
+            'phone'      => $full_phone,
             'message'    => $message,
             'language'   => $language,
             'ip_address' => $ip_masked,
@@ -85,6 +93,10 @@ class Safak_Ajax_Handler {
             $first_name,
             $last_name,
             $phone,
+            $country_name,
+            $country_code,
+            $country_flag,
+            $country_flag_iso,
             $message,
             $language,
             $ip_masked
@@ -107,6 +119,10 @@ class Safak_Ajax_Handler {
         string $first_name,
         string $last_name,
         string $phone,
+        string $country_name,
+        string $country_code,
+        string $country_flag,
+        string $country_flag_iso,
         string $message,
         string $language,
         string $ip
@@ -173,7 +189,7 @@ class Safak_Ajax_Handler {
                       Patient Information
                     </p>
 
-                    <!-- Full Name -->
+                    <!-- Details Table -->
                     <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
                       <tr>
                         <td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Full Name</td>
@@ -185,17 +201,19 @@ class Safak_Ajax_Handler {
                         <td colspan="2" style="height:1px;background:#F0F4F8;"></td>
                       </tr>
                       <tr>
-                        <td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Phone Number</td>
+                        <td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Country</td>
                         <td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;">
-                          <a href="tel:{$phone}" style="color:#00558F;text-decoration:none;">{$phone}</a>
+                          <img src="https://flagcdn.com/20x15/{$country_flag_iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;margin-right:6px;border-radius:2px;box-shadow:0 1px 2px rgba(0,0,0,0.15);" /> {$country_name}
                         </td>
                       </tr>
                       <tr>
                         <td colspan="2" style="height:1px;background:#F0F4F8;"></td>
                       </tr>
                       <tr>
-                        <td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Language Used</td>
-                        <td style="font-size:15px;color:#1A2B3C;vertical-align:top;padding:10px 0;">{$lang_display}</td>
+                        <td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Phone Number</td>
+                        <td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;">
+                          <a href="tel:{$country_code}{$phone}" style="color:#00558F;text-decoration:none;">{$country_code} {$phone}</a>
+                        </td>
                       </tr>
                       <tr>
                         <td colspan="2" style="height:1px;background:#F0F4F8;"></td>
@@ -227,9 +245,9 @@ class Safak_Ajax_Handler {
           <!-- CTA -->
           <tr>
             <td style="padding:0 40px 40px;text-align:center;">
-              <a href="mailto:{$phone}?subject=Re: Your Consultation Request"
+              <a href="tel:{$country_code}{$phone}"
                  style="display:inline-block;background:#00558F;color:#FFFFFF;text-decoration:none;font-size:14px;font-weight:700;padding:14px 36px;border-radius:8px;letter-spacing:0.5px;">
-                Reply to Patient
+                Call Patient
               </a>
             </td>
           </tr>
