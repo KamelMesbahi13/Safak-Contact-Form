@@ -28,14 +28,7 @@
 
     // ── State ────────────────────────────────────────────────────────────────
     let currentLang   = ( window.SafakPopup && SafakPopup.currentLang ) ? SafakPopup.currentLang : 'en';
-    let isSubmitting  = false;
     let triggerButton = null;   // Element that opened the modal (for focus return).
-
-    // Country Picker State
-    let selectedCountryCode = '+213';
-    let selectedCountryName = 'Algeria';
-    let selectedCountryFlag = '🇩🇿';
-    let hasManuallySelectedCountry = false;
 
     // Standard list of world countries (excl. Israel +972 / IL)
     const COUNTRIES = [
@@ -247,86 +240,45 @@
         { name: 'Zimbabwe', code: '+263', flag: '🇿🇼' }
     ];
 
-    // ── DOM References (resolved after init) ─────────────────────────────────
-    let overlay, modal, form, closeBtn, submitBtn, langBtns,
-        logoEl, successPanel, errorPanel, hiddenLangInput;
-
-    // Country DOM References
-    let countryToggleBtn, countryMenu, countrySearchInput, countryListContainer;
+    // ── Global DOM References (Modal specific) ──────────────────────────────
+    let overlay, modal, closeBtn, langBtns, logoEl;
 
     // ────────────────────────────────────────────────────────────────────────
     function init() {
-
         overlay          = document.getElementById( 'safak-popup-overlay' );
         modal            = document.getElementById( 'safak-modal' );
-        form             = document.getElementById( 'safak-consultation-form' );
         closeBtn         = document.getElementById( 'safak-close-btn' );
-        submitBtn        = document.getElementById( 'safak-submit-btn' );
         logoEl           = document.getElementById( 'safak-logo' );
-        successPanel     = document.getElementById( 'safak-form-success' );
-        errorPanel       = document.getElementById( 'safak-form-error' );
-        hiddenLangInput  = document.getElementById( 'safak-language' );
         langBtns         = document.querySelectorAll( '.safak-lang-btn' );
 
-        countryToggleBtn     = document.getElementById( 'safak-country-toggle' );
-        countryMenu          = document.getElementById( 'safak-country-menu' );
-        countrySearchInput   = document.getElementById( 'safak-country-search' );
-        countryListContainer = document.getElementById( 'safak-country-list' );
-
-        if ( ! overlay || ! modal || ! form ) {
-            // Modal HTML not on this page – nothing to initialise.
-            return;
-        }
+        // ── 1. Initialize all Form instances on the page ──────────────────────
+        document.querySelectorAll( '.safak-form-wrapper-container' ).forEach( container => {
+            initFormInstance( container );
+        } );
 
         // Set logo src from PHP-passed URL.
         if ( logoEl && window.SafakPopup && SafakPopup.logoUrl ) {
             logoEl.src = SafakPopup.logoUrl;
         }
 
-        // Populate country dropdown options
-        populateCountries();
-
-        // Set default selected country dynamically based on active language
-        setDefaultCountryForLang( currentLang );
-
-        // Apply default language strings.
-        applyLanguage( currentLang );
-
-        // ── Country Picker Listeners ─────────────────────────────────────────
-        if ( countryToggleBtn ) {
-            countryToggleBtn.addEventListener( 'click', function ( e ) {
-                e.stopPropagation();
-                toggleCountryMenu();
-            } );
+        // Apply default language strings to the modal content.
+        if ( modal ) {
+            applyModalLanguage( currentLang );
         }
 
-        if ( countrySearchInput ) {
-            countrySearchInput.addEventListener( 'input', function () {
-                filterCountries( this.value );
-            } );
-            countrySearchInput.addEventListener( 'click', function ( e ) {
-                e.stopPropagation();
-            } );
-        }
-
-        // Hide dropdown on outside click
+        // ── Event Listeners (Global popup triggers) ───────────────────────────
         document.addEventListener( 'click', function ( e ) {
-            if ( countryMenu && ! countryMenu.hidden ) {
-                if ( ! countryMenu.contains( e.target ) && ! countryToggleBtn.contains( e.target ) ) {
-                    closeCountryMenu();
-                }
-            }
-        } );
-
-        // ── Event Listeners ──────────────────────────────────────────────────
-
-        // Robust Event Delegation: Listen for clicks on any element with .safak-popup-trigger,
-        // ID safak-open-popup, or anchor tags linking to #safak-popup (supporting subfolders).
-        document.addEventListener( 'click', function ( e ) {
-            const trigger = e.target.closest( '.safak-popup-trigger, #safak-open-popup, a[href$="#safak-popup"]' );
+            const trigger = e.target.closest( '.safak-popup-trigger, #safak-open-popup, a' );
             if ( trigger ) {
-                e.preventDefault();
-                openModal( trigger );
+                const href = trigger.getAttribute( 'href' ) || '';
+                const isPopupTrigger = trigger.classList.contains( 'safak-popup-trigger' ) || 
+                                      trigger.id === 'safak-open-popup' || 
+                                      href.includes( '#safak-popup' ) || 
+                                      ( trigger.hash && trigger.hash === '#safak-popup' );
+                if ( isPopupTrigger ) {
+                    e.preventDefault();
+                    openModal( trigger );
+                }
             }
         } );
 
@@ -335,36 +287,30 @@
             closeBtn.addEventListener( 'click', closeModal );
         }
 
-        // Close on backdrop click (not modal itself).
-        overlay.addEventListener( 'click', function ( e ) {
-            if ( e.target === overlay ) closeModal();
-        } );
+        // Close on backdrop click.
+        if ( overlay ) {
+            overlay.addEventListener( 'click', function ( e ) {
+                if ( e.target === overlay ) closeModal();
+            } );
+        }
 
         // Close on Escape key.
         document.addEventListener( 'keydown', function ( e ) {
-            if ( e.key === 'Escape' && ! overlay.hidden ) closeModal();
+            if ( e.key === 'Escape' && overlay && ! overlay.hidden ) closeModal();
         } );
 
         // Trap Tab focus inside modal when open.
-        modal.addEventListener( 'keydown', trapFocus );
+        if ( modal ) {
+            modal.addEventListener( 'keydown', trapFocus );
+        }
 
-        // Language switcher.
+        // Language switcher for modal.
         langBtns.forEach( btn => {
             btn.addEventListener( 'click', function () {
                 const lang = this.dataset.lang;
                 if ( lang && lang !== currentLang ) {
-                    applyLanguage( lang );
+                    applyModalLanguage( lang );
                 }
-            } );
-        } );
-
-        // Form submission.
-        form.addEventListener( 'submit', handleSubmit );
-
-        // Real-time error clearing on input.
-        form.querySelectorAll( '.safak-form__input, .safak-form__textarea' ).forEach( el => {
-            el.addEventListener( 'input', function () {
-                clearFieldError( this );
             } );
         } );
 
@@ -378,18 +324,14 @@
             },
             setLanguage: function ( lang ) {
                 if ( [ 'en', 'fr', 'ar' ].includes( lang ) ) {
-                    applyLanguage( lang );
+                    applyModalLanguage( lang );
                 }
             }
         };
 
         // ── Hash-based trigger ────────────────────────────────────────────────
-        // If the page loaded with #safak-popup in the URL (e.g. from a
-        // multilingual menu link like /fr/accueil/#safak-popup), open the modal
-        // immediately and silently clean the hash from the address bar.
         function checkAndOpenFromHash() {
-            if ( window.location.hash === '#safak-popup' ) {
-                // Clean the URL without reloading the page.
+            if ( window.location.hash && window.location.hash.includes( '#safak-popup' ) ) {
                 if ( window.history && window.history.replaceState ) {
                     window.history.replaceState(
                         null,
@@ -401,205 +343,346 @@
             }
         }
 
-        // Check on initial load.
         checkAndOpenFromHash();
-
-        // Also listen for hash changes (SPA / Elementor smooth scroll scenarios).
         window.addEventListener( 'hashchange', checkAndOpenFromHash );
     }
 
-    // ── Modal Open / Close ───────────────────────────────────────────────────
+    // ── Form Instance Initializer ────────────────────────────────────────────
+    function initFormInstance( container ) {
+        const form             = container.querySelector( '.safak-consultation-form' );
+        if ( ! form ) return;
 
-    function openModal( trigger ) {
-        if ( trigger instanceof HTMLElement ) {
-            triggerButton = trigger;
-        } else if ( trigger && trigger.currentTarget ) {
-            triggerButton = trigger.currentTarget;
-        }
+        const submitBtn        = container.querySelector( '.safak-form__submit' );
+        const successPanel     = container.querySelector( '.safak-feedback--success' );
+        const errorPanel       = container.querySelector( '.safak-feedback--error' );
 
-        // Reset state: hide feedback, show form.
-        showForm();
+        const countryToggleBtn     = container.querySelector( '.safak-country-btn' );
+        const countryMenu          = container.querySelector( '.safak-country-dropdown' );
+        const countrySearchInput   = container.querySelector( '.safak-country-search' );
+        const countryListContainer = container.querySelector( '.safak-country-list' );
 
-        // Remove hidden attribute then trigger CSS transition.
-        overlay.hidden = false;
-        // Force reflow so transition fires.
-        void overlay.offsetWidth;
-        overlay.classList.add( 'is-visible' );
-
-        // Move focus to close button (accessible).
-        if ( closeBtn ) {
-            closeBtn.focus();
-        }
-
-        // Prevent page scroll.
-        document.body.style.overflow = 'hidden';
-    }
-
-    function closeModal() {
-        overlay.classList.remove( 'is-visible' );
-
-        // Safe cleanup function to run once transition is done or as a fallback
-        let cleanedUp = false;
-        const cleanup = () => {
-            if ( cleanedUp ) return;
-            cleanedUp = true;
-            overlay.hidden = true;
-            document.body.style.overflow = '';
-            if ( triggerButton ) {
-                triggerButton.focus();
-                triggerButton = null;
-            }
+        // Local Form instance state
+        let instanceState = {
+            selectedCountryCode: '+213',
+            selectedCountryName: 'Algeria',
+            selectedCountryFlag: '🇩🇿',
+            hasManuallySelectedCountry: false,
+            isSubmitting: false,
+            lang: container.dataset.lang || 'en'
         };
 
-        // Wait for transition to finish, with a 250ms fallback safety timer
-        overlay.addEventListener( 'transitionend', cleanup, { once: true } );
-        setTimeout( cleanup, 250 );
+        // Populate country list for this instance
+        populateCountries( countryListContainer, instanceState, onCountrySelect );
+
+        // Always default to Algeria as requested
+        setDefaultCountryForLang( instanceState, instanceState.lang );
+
+        // ── Event Listeners relative to this form ────────────────────────────
+        if ( countryToggleBtn && countryMenu ) {
+            countryToggleBtn.addEventListener( 'click', function ( e ) {
+                e.stopPropagation();
+                toggleCountryMenu( countryMenu, countryToggleBtn );
+            } );
+        }
+
+        if ( countrySearchInput ) {
+            countrySearchInput.addEventListener( 'input', function () {
+                filterCountries( countryListContainer, this.value );
+            } );
+            countrySearchInput.addEventListener( 'click', function ( e ) {
+                e.stopPropagation();
+            } );
+        }
+
+        // Hide dropdown on outside click
+        document.addEventListener( 'click', function ( e ) {
+            if ( countryMenu && ! countryMenu.hidden ) {
+                if ( ! countryMenu.contains( e.target ) && ! countryToggleBtn.contains( e.target ) ) {
+                    closeCountryMenu( countryMenu, countryToggleBtn );
+                }
+            }
+        } );
+
+        // Form submission
+        form.addEventListener( 'submit', function ( e ) {
+            handleSubmit( e, form, container, instanceState, successPanel, errorPanel, submitBtn );
+        } );
+
+        // Clear error on input
+        form.querySelectorAll( '.safak-form__input, .safak-form__textarea' ).forEach( el => {
+            el.addEventListener( 'input', function () {
+                clearFieldError( form, this );
+            } );
+        } );
+
+        // Expose public showForm method on container for external resets
+        container.resetFormInstance = function() {
+            form.hidden         = false;
+            successPanel.hidden = true;
+            errorPanel.hidden   = true;
+            form.reset();
+            clearAllErrors( form );
+            instanceState.isSubmitting = false;
+            setLoadingState( submitBtn, false );
+            setDefaultCountryForLang( instanceState, instanceState.lang );
+        };
+
+        // When country is manually selected
+        function onCountrySelect( code, name, flag ) {
+            instanceState.selectedCountryCode = code;
+            instanceState.selectedCountryName = name;
+            instanceState.selectedCountryFlag = flag;
+            instanceState.hasManuallySelectedCountry = true;
+            
+            // Update toggle button flag
+            if ( countryToggleBtn ) {
+                const flagEl = countryToggleBtn.querySelector( '.safak-country-selected-flag' );
+                if ( flagEl ) {
+                    const iso = flagEmojiToISO( flag );
+                    flagEl.innerHTML = `<img src="https://flagcdn.com/20x15/${iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;" />`;
+                }
+            }
+
+            // Update phone input placeholder
+            const phoneInput = form.querySelector( '[name="phone"]' );
+            if ( phoneInput ) {
+                phoneInput.placeholder = code;
+            }
+
+            // Update active styling in item list
+            if ( countryListContainer ) {
+                countryListContainer.querySelectorAll( '.safak-country-item' ).forEach( item => {
+                    if ( item.dataset.code === code && item.dataset.name === name ) {
+                        item.classList.add( 'active' );
+                    } else {
+                        item.classList.remove( 'active' );
+                    }
+                } );
+            }
+
+            // Auto-close menu on selection
+            if ( countryMenu && countryToggleBtn ) {
+                closeCountryMenu( countryMenu, countryToggleBtn );
+            }
+        }
     }
 
-    // ── Language Switching ───────────────────────────────────────────────────
+    // ── Reusable Helper Functions ────────────────────────────────────────────
 
-    /**
-     * Apply the selected language to all data-i18n elements and placeholders.
-     * Also sets dir attribute for RTL support.
-     *
-     * @param {string} lang  'en' | 'fr' | 'ar'
-     */
-    function applyLanguage( lang ) {
+    function populateCountries( container, state, onSelect ) {
+        if ( ! container ) return;
+        container.innerHTML = '';
+        COUNTRIES.forEach( c => {
+            const item = document.createElement( 'div' );
+            item.className = 'safak-country-item';
+            item.dataset.code = c.code;
+            item.dataset.name = c.name;
+            item.dataset.flag = c.flag;
+            item.role = 'option';
+            
+            if ( state.selectedCountryCode === c.code && state.selectedCountryName === c.name ) {
+                item.classList.add( 'active' );
+            }
+            
+            const iso = flagEmojiToISO( c.flag );
+            item.innerHTML = `
+                <span class="safak-country-item-flag">
+                    <img src="https://flagcdn.com/20x15/${iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;" />
+                </span>
+                <span class="safak-country-item-text">${c.name} (${c.code})</span>
+            `;
+            
+            item.addEventListener( 'click', function () {
+                onSelect( c.code, c.name, c.flag );
+            } );
+            
+            container.appendChild( item );
+        } );
+    }
+
+    function setDefaultCountryForLang( state, lang ) {
+        // As requested: the default flag is strictly the Algerian one (+213) in all 3 languages
+        let defCode = '+213', defName = 'Algeria', defFlag = '🇩🇿';
+        
+        state.selectedCountryCode = defCode;
+        state.selectedCountryName = defName;
+        state.selectedCountryFlag = defFlag;
+    }
+
+    function toggleCountryMenu( menu, btn ) {
+        if ( menu.hidden ) {
+            openCountryMenu( menu, btn );
+        } else {
+            closeCountryMenu( menu, btn );
+        }
+    }
+
+    function openCountryMenu( menu, btn ) {
+        menu.hidden = false;
+        btn.setAttribute( 'aria-expanded', 'true' );
+        const wrapper = btn.closest( '.safak-phone-wrapper' );
+        if ( wrapper ) {
+            wrapper.classList.add( 'is-open' );
+        }
+        const searchInput = menu.querySelector( '.safak-country-search' );
+        if ( searchInput ) {
+            searchInput.value = '';
+            searchInput.focus();
+        }
+        filterCountries( menu.querySelector( '.safak-country-list' ), '' );
+    }
+
+    function closeCountryMenu( menu, btn ) {
+        menu.hidden = true;
+        btn.setAttribute( 'aria-expanded', 'false' );
+        const wrapper = btn.closest( '.safak-phone-wrapper' );
+        if ( wrapper ) {
+            wrapper.classList.remove( 'is-open' );
+        }
+    }
+
+    function filterCountries( listContainer, query ) {
+        if ( ! listContainer ) return;
+        const items = listContainer.querySelectorAll( '.safak-country-item' );
+        const normalizedQuery = query.toLowerCase().trim();
+        items.forEach( item => {
+            const name = (item.dataset.name || '').toLowerCase();
+            const code = (item.dataset.code || '').toLowerCase();
+            if ( name.includes( normalizedQuery ) || code.includes( normalizedQuery ) ) {
+                item.style.display = 'flex';
+            } else {
+                item.style.display = 'none';
+            }
+        } );
+    }
+
+    // ── Language Switching for Modal (Global modal translations) ─────────────
+
+    function applyModalLanguage( lang ) {
         const i18n = ( window.SafakI18n || {} )[ lang ];
         if ( ! i18n ) return;
 
         currentLang = lang;
 
-        // Update hidden language field.
-        if ( hiddenLangInput ) hiddenLangInput.value = lang;
+        // Apply translations inside the modal container only to avoid interfering with inline forms
+        if ( modal ) {
+            modal.querySelectorAll( '[data-i18n]' ).forEach( el => {
+                const key = el.dataset.i18n;
+                if ( i18n[ key ] !== undefined ) {
+                    el.textContent = i18n[ key ];
+                }
+            } );
 
-        // ── Text content ──────────────────────────────────────────────────
-        modal.querySelectorAll( '[data-i18n]' ).forEach( el => {
-            const key = el.dataset.i18n;
-            if ( i18n[ key ] !== undefined ) {
-                el.textContent = i18n[ key ];
+            modal.querySelectorAll( '[data-i18n-placeholder]' ).forEach( el => {
+                const key = el.dataset.i18nPlaceholder;
+                if ( i18n[ key ] !== undefined ) {
+                    el.placeholder = i18n[ key ];
+                }
+            } );
+
+            const isRTL = i18n.dir === 'rtl';
+            modal.setAttribute( 'data-dir', isRTL ? 'rtl' : 'ltr' );
+            modal.setAttribute( 'dir', isRTL ? 'rtl' : 'ltr' );
+
+            // Sync the active class in the language switcher buttons inside the modal
+            langBtns.forEach( btn => {
+                if ( btn.dataset.lang === lang ) {
+                    btn.classList.add( 'active' );
+                } else {
+                    btn.classList.remove( 'active' );
+                }
+            } );
+
+            // Sync the popup form instance's language dataset & reset if needed
+            const popupWrapper = modal.querySelector( '.safak-form-wrapper-container' );
+            if ( popupWrapper ) {
+                popupWrapper.dataset.lang = lang;
+                const hiddenLangInput = popupWrapper.querySelector( '[name="language"]' );
+                if ( hiddenLangInput ) hiddenLangInput.value = lang;
+                
+                // Re-apply placeholders to form inputs (excluding the phone country code placeholder)
+                popupWrapper.querySelectorAll( '[placeholder]' ).forEach( el => {
+                    if ( el.name === 'first_name' && i18n.placeholder_first_name ) el.placeholder = i18n.placeholder_first_name;
+                    if ( el.name === 'last_name' && i18n.placeholder_last_name ) el.placeholder = i18n.placeholder_last_name;
+                    if ( el.name === 'message' && i18n.placeholder_message ) el.placeholder = i18n.placeholder_message;
+                } );
+
+                popupWrapper.querySelectorAll( '.safak-form__label' ).forEach( el => {
+                    const nextInput = el.nextElementSibling;
+                    if ( nextInput ) {
+                        if ( nextInput.name === 'first_name' && i18n.label_first_name ) el.textContent = i18n.label_first_name;
+                        if ( nextInput.name === 'last_name' && i18n.label_last_name ) el.textContent = i18n.label_last_name;
+                        if ( nextInput.name === 'message' && i18n.label_message ) el.textContent = i18n.label_message;
+                    }
+                    if ( el.nextElementSibling && el.nextElementSibling.classList.contains('safak-phone-wrapper') && i18n.label_phone ) {
+                        el.textContent = i18n.label_phone;
+                    }
+                } );
             }
-        } );
-
-        // ── Placeholders ──────────────────────────────────────────────────
-        modal.querySelectorAll( '[data-i18n-placeholder]' ).forEach( el => {
-            const key = el.dataset.i18nPlaceholder;
-            if ( i18n[ key ] !== undefined ) {
-                el.placeholder = i18n[ key ];
-            }
-        } );
-
-        // ── RTL / LTR layout ──────────────────────────────────────────────
-        const isRTL = i18n.dir === 'rtl';
-        modal.setAttribute( 'data-dir', isRTL ? 'rtl' : 'ltr' );
-        modal.setAttribute( 'dir', isRTL ? 'rtl' : 'ltr' );
-
-        // Apply dir to individual inputs for correct cursor behaviour.
-        form.querySelectorAll( 'input, textarea' ).forEach( el => {
-            if ( el.id === 'safak-phone' ) {
-                el.dir = 'ltr';
-            } else {
-                el.dir = isRTL ? 'rtl' : 'ltr';
-            }
-        } );
-
-        // Update default country selector when language switches (only if user hasn't manually selected yet)
-        if ( ! hasManuallySelectedCountry ) {
-            setDefaultCountryForLang( lang );
         }
 
-        // ── Active button styling ─────────────────────────────────────────
-        langBtns.forEach( btn => {
-            btn.classList.toggle( 'active', btn.dataset.lang === lang );
-        } );
-
-        // ── aria-label for close (accessibility, translated) ──────────────
         if ( closeBtn ) {
             const closeLabels = { en: 'Close', fr: 'Fermer', ar: 'إغلاق' };
             closeBtn.setAttribute( 'aria-label', closeLabels[ lang ] || 'Close' );
         }
-
-        // Re-apply any visible error messages in the new language.
-        refreshVisibleErrors( i18n );
     }
 
-    /**
-     * After a language switch, refresh error text on fields that are
-     * already showing errors so they display in the new language.
-     */
-    function refreshVisibleErrors( i18n ) {
-        modal.querySelectorAll( '.safak-form__error.is-visible' ).forEach( el => {
-            const key = el.dataset.i18n;
-            if ( key && i18n[ key ] !== undefined ) {
-                el.textContent = i18n[ key ];
-            }
-        } );
-    }
+    // ── Form Validation ──────────────────────────────────────────────────────
 
-    // ── Validation ───────────────────────────────────────────────────────────
-
-    /**
-     * Validate all required fields.
-     * Returns true if valid, false otherwise (and shows inline errors).
-     */
-    function validateForm() {
-        const i18n    = ( window.SafakI18n || {} )[ currentLang ] || {};
+    function validateForm( form, lang ) {
+        const i18n    = ( window.SafakI18n || {} )[ lang ] || {};
         let   isValid = true;
 
-        // 1. First Name Validation (Required, Min 2 chars)
-        const firstNameInput = document.getElementById( 'safak-first-name' );
+        const firstNameInput = form.querySelector( '[name="first_name"]' );
         if ( firstNameInput ) {
             const val = firstNameInput.value.trim();
             if ( val === '' ) {
-                showFieldError( firstNameInput, i18n.error_required || 'This field is required.' );
+                showFieldError( form, firstNameInput, i18n.error_required || 'This field is required.' );
                 isValid = false;
             } else if ( val.length < 2 ) {
-                showFieldError( firstNameInput, i18n.error_min_name || 'Minimum 2 characters required.' );
+                showFieldError( form, firstNameInput, i18n.error_min_name || 'Minimum 2 characters required.' );
                 isValid = false;
             }
         }
 
-        // 2. Last Name Validation (Required, Min 2 chars)
-        const lastNameInput = document.getElementById( 'safak-last-name' );
+        const lastNameInput = form.querySelector( '[name="last_name"]' );
         if ( lastNameInput ) {
             const val = lastNameInput.value.trim();
             if ( val === '' ) {
-                showFieldError( lastNameInput, i18n.error_required || 'This field is required.' );
+                showFieldError( form, lastNameInput, i18n.error_required || 'This field is required.' );
                 isValid = false;
             } else if ( val.length < 2 ) {
-                showFieldError( lastNameInput, i18n.error_min_name || 'Minimum 2 characters required.' );
+                showFieldError( form, lastNameInput, i18n.error_min_name || 'Minimum 2 characters required.' );
                 isValid = false;
             }
         }
 
-        // 3. Phone Number Validation (Required, Min 6 digits, Regex check)
-        const phoneInput = document.getElementById( 'safak-phone' );
+        const phoneInput = form.querySelector( '[name="phone"]' );
         if ( phoneInput ) {
             const val = phoneInput.value.trim();
             if ( val === '' ) {
-                showFieldError( phoneInput, i18n.error_required || 'This field is required.' );
+                showFieldError( form, phoneInput, i18n.error_required || 'This field is required.' );
                 isValid = false;
             } else if ( val.length < 6 ) {
-                showFieldError( phoneInput, i18n.error_min_phone || 'Minimum 6 digits required.' );
+                showFieldError( form, phoneInput, i18n.error_min_phone || 'Minimum 6 digits required.' );
                 isValid = false;
             } else {
                 const phoneRegex = /^[0-9\+\-\s\(\)]{6,25}$/;
                 if ( ! phoneRegex.test( val ) ) {
-                    showFieldError( phoneInput, i18n.error_phone_format || 'Please enter a valid phone number.' );
+                    showFieldError( form, phoneInput, i18n.error_phone_format || 'Please enter a valid phone number.' );
                     isValid = false;
                 }
             }
         }
 
-        // 4. Message Validation (Required, Min 5 chars)
-        const messageInput = document.getElementById( 'safak-message' );
+        const messageInput = form.querySelector( '[name="message"]' );
         if ( messageInput ) {
             const val = messageInput.value.trim();
             if ( val === '' ) {
-                showFieldError( messageInput, i18n.error_required || 'This field is required.' );
+                showFieldError( form, messageInput, i18n.error_required || 'This field is required.' );
                 isValid = false;
             } else if ( val.length < 5 ) {
-                showFieldError( messageInput, i18n.error_min_message || 'Minimum 5 characters required.' );
+                showFieldError( form, messageInput, i18n.error_min_message || 'Minimum 5 characters required.' );
                 isValid = false;
             }
         }
@@ -607,7 +690,7 @@
         return isValid;
     }
 
-    function showFieldError( inputEl, message ) {
+    function showFieldError( form, inputEl, message ) {
         inputEl.classList.add( 'has-error' );
         const errorEl = form.querySelector(
             `.safak-form__error[data-field="${ inputEl.name }"]`
@@ -618,7 +701,7 @@
         }
     }
 
-    function clearFieldError( inputEl ) {
+    function clearFieldError( form, inputEl ) {
         inputEl.classList.remove( 'has-error' );
         const errorEl = form.querySelector(
             `.safak-form__error[data-field="${ inputEl.name }"]`
@@ -629,7 +712,7 @@
         }
     }
 
-    function clearAllErrors() {
+    function clearAllErrors( form ) {
         form.querySelectorAll( '.has-error' ).forEach( el => el.classList.remove( 'has-error' ) );
         form.querySelectorAll( '.safak-form__error' ).forEach( el => {
             el.textContent = '';
@@ -639,41 +722,44 @@
 
     // ── AJAX Submission ──────────────────────────────────────────────────────
 
-    async function handleSubmit( e ) {
+    async function handleSubmit( e, form, container, state, successPanel, errorPanel, submitBtn ) {
         e.preventDefault();
 
-        if ( isSubmitting ) return;
+        if ( state.isSubmitting ) return;
 
-        clearAllErrors();
+        clearAllErrors( form );
 
-        if ( ! validateForm() ) {
-            // Scroll to first error.
+        if ( ! validateForm( form, state.lang ) ) {
             const firstError = form.querySelector( '.has-error' );
             if ( firstError ) firstError.focus();
             return;
         }
 
-        // Check WP config is available.
         if ( ! window.SafakPopup ) {
             console.error( '[Safak Popup] SafakPopup config missing.' );
             return;
         }
 
-        isSubmitting = true;
-        setLoadingState( true );
+        state.isSubmitting = true;
+        setLoadingState( submitBtn, true );
 
         const formData = new FormData();
-        formData.append( 'action',     SafakPopup.action );
-        formData.append( 'nonce',      SafakPopup.nonce );
-        formData.append( 'first_name', form.querySelector( '[name="first_name"]' ).value.trim() );
-        formData.append( 'last_name',  form.querySelector( '[name="last_name"]' ).value.trim() );
-        formData.append( 'phone',      form.querySelector( '[name="phone"]' ).value.trim() );
-        formData.append( 'country_name', selectedCountryName );
-        formData.append( 'country_code', selectedCountryCode );
-        formData.append( 'country_flag', selectedCountryFlag );
-        formData.append( 'country_flag_iso', flagEmojiToISO( selectedCountryFlag ) );
-        formData.append( 'message',    form.querySelector( '[name="message"]' ).value.trim() );
-        formData.append( 'language',   currentLang );
+        formData.append( 'action',       SafakPopup.action );
+        formData.append( 'nonce',        SafakPopup.nonce );
+        formData.append( 'first_name',   form.querySelector( '[name="first_name"]' ).value.trim() );
+        formData.append( 'last_name',    form.querySelector( '[name="last_name"]' ).value.trim() );
+        formData.append( 'phone',        form.querySelector( '[name="phone"]' ).value.trim() );
+        formData.append( 'country_name', state.selectedCountryName );
+        formData.append( 'country_code', state.selectedCountryCode );
+        formData.append( 'country_flag', state.selectedCountryFlag );
+        formData.append( 'country_flag_iso', flagEmojiToISO( state.selectedCountryFlag ) );
+        formData.append( 'message',      form.querySelector( '[name="message"]' ).value.trim() );
+        formData.append( 'language',     state.lang );
+
+        const honeypotInput = form.querySelector( '[name="safak_honeypot"]' );
+        if ( honeypotInput ) {
+            formData.append( 'safak_honeypot', honeypotInput.value );
+        }
 
         try {
             const response = await fetch( SafakPopup.ajaxUrl, {
@@ -685,62 +771,39 @@
             const data = await response.json();
 
             if ( data.success ) {
-                showSuccess();
+                form.hidden         = true;
+                successPanel.hidden = false;
+                errorPanel.hidden   = true;
+                successPanel.focus();
             } else {
-                // Server-side field errors.
                 if ( data.data && data.data.fields ) {
-                    const i18n = ( window.SafakI18n || {} )[ currentLang ] || {};
+                    const i18n = ( window.SafakI18n || {} )[ state.lang ] || {};
                     data.data.fields.forEach( field => {
                         const input = form.querySelector( `[name="${ field }"]` );
                         if ( input ) {
-                            showFieldError( input, i18n.error_required || 'This field is required.' );
+                            showFieldError( form, input, i18n.error_required || 'This field is required.' );
                         }
                     } );
                 } else {
-                    showError();
+                    errorPanel.hidden = false;
+                    errorPanel.focus();
                 }
             }
         } catch ( err ) {
             console.error( '[Safak Popup] Submission error:', err );
-            showError();
+            errorPanel.hidden = false;
+            errorPanel.focus();
         } finally {
-            isSubmitting = false;
-            setLoadingState( false );
+            state.isSubmitting = false;
+            setLoadingState( submitBtn, false );
         }
     }
 
-    // ── UI State Helpers ──────────────────────────────────────────────────────
-
-    function setLoadingState( loading ) {
-        submitBtn.disabled = loading;
-        submitBtn.classList.toggle( 'is-loading', loading );
+    function setLoadingState( btn, loading ) {
+        if ( ! btn ) return;
+        btn.disabled = loading;
+        btn.classList.toggle( 'is-loading', loading );
     }
-
-    function showSuccess() {
-        form.hidden         = true;
-        successPanel.hidden = false;
-        errorPanel.hidden   = true;
-        successPanel.focus();
-    }
-
-    function showError() {
-        errorPanel.hidden = false;
-        errorPanel.focus();
-    }
-
-    function showForm() {
-        if ( form )          form.hidden         = false;
-        if ( successPanel )  successPanel.hidden = true;
-        if ( errorPanel )    errorPanel.hidden   = true;
-        if ( form )          form.reset();
-        clearAllErrors();
-        isSubmitting = false;
-        setLoadingState( false );
-        // Re-apply language so placeholders/labels are fresh.
-        applyLanguage( currentLang );
-    }
-
-    // ── Country Dropdown Helpers ──────────────────────────────────────────────
 
     function flagEmojiToISO( emoji ) {
         if ( ! emoji ) return 'dz';
@@ -757,133 +820,57 @@
         }
     }
 
-    function populateCountries() {
-        if ( ! countryListContainer ) return;
-        countryListContainer.innerHTML = '';
-        COUNTRIES.forEach( c => {
-            const item = document.createElement( 'div' );
-            item.className = 'safak-country-item';
-            item.dataset.code = c.code;
-            item.dataset.name = c.name;
-            item.dataset.flag = c.flag;
-            item.role = 'option';
-            
-            if ( selectedCountryCode === c.code && selectedCountryName === c.name ) {
-                item.classList.add( 'active' );
+    // ── Global Modal Open / Close ────────────────────────────────────────────
+
+    function openModal( trigger ) {
+        if ( trigger instanceof HTMLElement ) {
+            triggerButton = trigger;
+        } else if ( trigger && trigger.currentTarget ) {
+            triggerButton = trigger.currentTarget;
+        }
+
+        if ( ! overlay ) {
+            console.warn( '[Safak Popup] Modal overlay "#safak-popup-overlay" not found on this page.' );
+            return;
+        }
+
+        const popupContainer = modal ? modal.querySelector( '.safak-form-wrapper-container' ) : null;
+        if ( popupContainer && popupContainer.resetFormInstance ) {
+            popupContainer.resetFormInstance();
+        }
+
+        overlay.hidden = false;
+        void overlay.offsetWidth;
+        overlay.classList.add( 'is-visible' );
+
+        if ( closeBtn ) {
+            closeBtn.focus();
+        }
+
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+        overlay.classList.remove( 'is-visible' );
+
+        let cleanedUp = false;
+        const cleanup = () => {
+            if ( cleanedUp ) return;
+            cleanedUp = true;
+            overlay.hidden = true;
+            document.body.style.overflow = '';
+            if ( triggerButton ) {
+                triggerButton.focus();
+                triggerButton = null;
             }
-            
-            const iso = flagEmojiToISO( c.flag );
-            item.innerHTML = `
-                <span class="safak-country-item-flag">
-                    <img src="https://flagcdn.com/20x15/${iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;" />
-                </span>
-                <span class="safak-country-item-text">${c.name} (${c.code})</span>
-            `;
-            
-            item.addEventListener( 'click', function () {
-                selectCountry( c.code, c.name, c.flag, true );
-                closeCountryMenu();
-            } );
-            
-            countryListContainer.appendChild( item );
-        } );
-    }
+        };
 
-    function selectCountry( code, name, flag, isManual = false ) {
-        selectedCountryCode = code;
-        selectedCountryName = name;
-        selectedCountryFlag = flag;
-        
-        if ( isManual ) {
-            hasManuallySelectedCountry = true;
-        }
-        
-        if ( countryToggleBtn ) {
-            const flagEl = countryToggleBtn.querySelector( '.safak-country-selected-flag' );
-            if ( flagEl ) {
-                const iso = flagEmojiToISO( flag );
-                flagEl.innerHTML = `<img src="https://flagcdn.com/20x15/${iso}.png" width="20" height="15" alt="" style="display:inline-block;vertical-align:middle;" />`;
-            }
-        }
-        
-        const phoneInput = document.getElementById( 'safak-phone' );
-        if ( phoneInput ) {
-            phoneInput.placeholder = code;
-        }
-        
-        if ( countryListContainer ) {
-            countryListContainer.querySelectorAll( '.safak-country-item' ).forEach( item => {
-                if ( item.dataset.code === code && item.dataset.name === name ) {
-                    item.classList.add( 'active' );
-                } else {
-                    item.classList.remove( 'active' );
-                }
-            } );
-        }
-    }
-
-    function setDefaultCountryForLang( lang ) {
-        // As requested, the default country flag is the Algerian one (+213) in all 3 languages
-        let defCode = '+213', defName = 'Algeria', defFlag = '🇩🇿';
-        selectCountry( defCode, defName, defFlag, false );
-    }
-
-    function toggleCountryMenu() {
-        if ( ! countryMenu ) return;
-        if ( countryMenu.hidden ) {
-            openCountryMenu();
-        } else {
-            closeCountryMenu();
-        }
-    }
-
-    function openCountryMenu() {
-        if ( ! countryMenu ) return;
-        countryMenu.hidden = false;
-        countryToggleBtn.setAttribute( 'aria-expanded', 'true' );
-        const wrapper = countryToggleBtn.closest( '.safak-phone-wrapper' );
-        if ( wrapper ) {
-            wrapper.classList.add( 'is-open' );
-        }
-        if ( countrySearchInput ) {
-            countrySearchInput.value = '';
-            countrySearchInput.focus();
-        }
-        filterCountries( '' );
-    }
-
-    function closeCountryMenu() {
-        if ( ! countryMenu ) return;
-        countryMenu.hidden = true;
-        countryToggleBtn.setAttribute( 'aria-expanded', 'false' );
-        const wrapper = countryToggleBtn.closest( '.safak-phone-wrapper' );
-        if ( wrapper ) {
-            wrapper.classList.remove( 'is-open' );
-        }
-    }
-
-    function filterCountries( query ) {
-        if ( ! countryListContainer ) return;
-        const items = countryListContainer.querySelectorAll( '.safak-country-item' );
-        const normalizedQuery = query.toLowerCase().trim();
-        items.forEach( item => {
-            const name = (item.dataset.name || '').toLowerCase();
-            const code = (item.dataset.code || '').toLowerCase();
-            if ( name.includes( normalizedQuery ) || code.includes( normalizedQuery ) ) {
-                item.style.display = 'flex';
-            } else {
-                item.style.display = 'none';
-            }
-        } );
+        overlay.addEventListener( 'transitionend', cleanup, { once: true } );
+        setTimeout( cleanup, 250 );
     }
 
     // ── Focus Trap (Accessibility) ────────────────────────────────────────────
 
-    /**
-     * Trap Tab/Shift+Tab focus within the modal while it is open.
-     * This meets WCAG 2.1 Success Criterion 2.1.2 (No Keyboard Trap... wait, we
-     * intentionally trap but provide Escape as an exit – that's correct per ARIA).
-     */
     function trapFocus( e ) {
         if ( e.key !== 'Tab' ) return;
 
