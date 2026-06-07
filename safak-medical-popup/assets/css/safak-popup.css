@@ -253,23 +253,24 @@
 
 /* Submit Button: Premium Brand Blue Clinical Gradient */
 .safak-form__submit {
-  display:         flex;
-  align-items:     center;
-  justify-content: center;
-  gap:             10px;
-  width:           100%;
+  display:         flex !important;
+  align-items:     center !important;
+  justify-content: center !important;
+  gap:             10px !important;
+  width:           100% !important;
+  box-sizing:      border-box !important;
   background:      linear-gradient(135deg, #00558F 0%, #3B82F6 100%) !important;
   color:           var(--safak-white) !important;
-  font-size:       14.5px;
-  font-weight:     700;
-  border:          none;
-  border-radius:   50px; /* Pill-shaped */
-  padding:         13px 28px;
-  cursor:          pointer;
-  transition:      transform var(--safak-transition), box-shadow var(--safak-transition), opacity var(--safak-transition);
-  box-shadow:      0 4px 14px rgba(0, 85, 143, 0.35);
-  margin-top:      10px;
-  line-height:     1.2;
+  font-size:       15px !important;
+  font-weight:     700 !important;
+  border:          none !important;
+  border-radius:   50px !important; /* Pill-shaped */
+  padding:         14px 28px !important;
+  cursor:          pointer !important;
+  transition:      transform var(--safak-transition), box-shadow var(--safak-transition), opacity var(--safak-transition) !important;
+  box-shadow:      0 4px 14px rgba(0, 85, 143, 0.35) !important;
+  margin-top:      10px !important;
+  line-height:     1.2 !important;
 }
 
 .safak-form__submit:hover:not(:disabled) {

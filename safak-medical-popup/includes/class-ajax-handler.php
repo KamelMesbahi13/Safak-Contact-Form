@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Safak_Ajax_Handler {
 
     /** Recipient email for all consultation notifications. */
-    const NOTIFY_EMAIL = 'kmlmes13@gmail.com';
+    const NOTIFY_EMAIL = 'manager.safakmedical@gmail.com';
 
     /** Register both logged-in and guest AJAX actions. */
     public static function init(): void {
