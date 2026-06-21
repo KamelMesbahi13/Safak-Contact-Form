@@ -3,7 +3,7 @@
  * Plugin Name:       Safak Medical – Popup Consultation Form
  * Plugin URI:        https://safakmedical.com
  * Description:       A lightweight, multilingual (EN/FR/AR) popup consultation form with AJAX submission, email notification, and database logging for Safak Medical.
- * Version:           1.0.9
+ * Version:           1.1.1
  * Author:            Safak Medical Dev Team
  * Author URI:        https://safakmedical.com
  * License:           GPL-2.0-or-later
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Plugin Constants ────────────────────────────────────────────────────────
-define( 'SAFAK_POPUP_VERSION',   '1.0.9' );
+define( 'SAFAK_POPUP_VERSION',   '1.1.1' );
 define( 'SAFAK_POPUP_FILE',      __FILE__ );
 define( 'SAFAK_POPUP_DIR',       plugin_dir_path( __FILE__ ) );
 define( 'SAFAK_POPUP_URL',       plugin_dir_url( __FILE__ ) );
