@@ -248,7 +248,7 @@
   margin-top: 2px;
 }
 
-/* Submit Button: Premium Brand Blue Clinical Gradient */
+/* Submit Button: Brand Blue */
 .safak-form__submit {
   display:         flex !important;
   align-items:     center !important;
@@ -256,7 +256,7 @@
   gap:             10px !important;
   width:           100% !important;
   box-sizing:      border-box !important;
-  background:      linear-gradient(135deg, #00558F 0%, #3B82F6 100%) !important;
+  background:      #1A4A72 !important;
   color:           var(--safak-white) !important;
   font-size:       15px !important;
   font-weight:     700 !important;
@@ -264,19 +264,20 @@
   border-radius:   50px !important; /* Pill-shaped */
   padding:         14px 28px !important;
   cursor:          pointer !important;
-  transition:      transform var(--safak-transition), box-shadow var(--safak-transition), opacity var(--safak-transition) !important;
-  box-shadow:      0 4px 14px rgba(0, 85, 143, 0.35) !important;
+  transition:      background 0.3s ease, box-shadow var(--safak-transition), opacity var(--safak-transition) !important;
+  box-shadow:      0 4px 14px rgba(26, 74, 114, 0.35) !important;
   margin-top:      10px !important;
   line-height:     1.2 !important;
 }
 
 .safak-form__submit:hover:not(:disabled) {
-  transform:   translateY(-1.5px);
-  box-shadow:  0 6px 20px rgba(0, 85, 143, 0.45);
+  background:  #E30213 !important;
+  color:       #ffffff !important;
+  box-shadow:  0 6px 20px rgba(227, 2, 19, 0.35) !important;
 }
 
 .safak-form__submit:active:not(:disabled) {
-  transform: translateY(0);
+  transform: scale(0.98);
 }
 
 .safak-form__submit:disabled {

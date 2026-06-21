@@ -207,16 +207,7 @@ HTML;
             <span class="safak-submit__spinner" aria-hidden="true"></span>
           </button>
 
-          <!-- WhatsApp Chat Option -->
-          <div class="safak-whatsapp-cta">
-            <p class="safak-whatsapp-cta__prompt" data-i18n="whatsapp_prompt">{$whatsapp_prompt}</p>
-            <a href="https://wa.me/905376917695" target="_blank" rel="noopener noreferrer" class="safak-whatsapp-cta__btn">
-              <span class="safak-whatsapp-cta__icon">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946C.06 5.348 5.397.01 12.008.01c3.202.001 6.212 1.246 8.477 3.514 2.266 2.268 3.507 5.28 3.505 8.484-.004 6.657-5.34 11.997-11.953 11.997-2.005-.001-3.973-.502-5.724-1.457L0 24zm6.59-4.846c1.6.95 3.188 1.449 4.825 1.451 5.436 0 9.86-4.42 9.864-9.864.002-2.637-1.03-5.114-2.905-6.989-1.873-1.873-4.351-2.905-6.986-2.907-5.435 0-9.86 4.42-9.864 9.864-.001 1.716.463 3.39 1.34 4.874l-.994 3.634 3.72-.962zm10.907-7.408c-.29-.146-1.72-.849-1.986-.945-.266-.096-.459-.144-.652.146-.193.29-.748.945-.917 1.139-.169.193-.339.217-.629.072-.29-.146-1.226-.452-2.334-1.441-.862-.77-1.444-1.72-1.613-2.012-.17-.29-.018-.447.127-.592.13-.13.29-.339.435-.509.145-.17.193-.29.29-.483.097-.193.048-.363-.024-.509-.072-.146-.652-1.573-.894-2.152-.236-.569-.475-.492-.652-.501-.17-.008-.363-.01-.556-.01-.193 0-.507.072-.772.363-.266.29-1.014.992-1.014 2.42 0 1.427 1.039 2.807 1.184 3.002.145.193 2.044 3.122 4.952 4.378.692.299 1.232.478 1.653.612.695.221 1.329.19 1.829.115.557-.084 1.72-.702 1.962-1.38.242-.678.242-1.258.17-1.38-.072-.122-.266-.193-.556-.339z"/></svg>
-              </span>
-              <span>{$btn_whatsapp}</span>
-            </a>
-          </div>
+
 
           <!-- Disclaimer related to Safak Medical's website -->
           <p class="safak-form__disclaimer" data-i18n="privacy_disclaimer">{$privacy_disclaimer}</p>
@@ -365,16 +356,16 @@ HTML;
         return [
             'en' => [
                 'tagline'              => 'Medical Consultation & Tourism',
-                'label_first_name'     => 'First Name',
-                'label_last_name'      => 'Last Name',
+                'label_first_name'     => 'Patient Name',
+                'label_last_name'      => 'Patient Last Name',
                 'label_phone'          => 'Phone Number',
-                'label_message'        => 'Your Message',
-                'placeholder_first_name' => 'First Name',
-                'placeholder_last_name'  => 'Last Name',
+                'label_message'        => 'Tell Us Your Condition',
+                'placeholder_first_name' => 'Patient Name',
+                'placeholder_last_name'  => 'Patient Last Name',
                 'placeholder_phone'      => 'Enter Your Number..',
                 'placeholder_search'     => 'Search country...',
-                'placeholder_message'    => 'Type your message...',
-                'btn_submit'           => 'Send Message',
+                'placeholder_message'    => 'Describe your condition or symptoms...',
+                'btn_submit'           => 'Send Request',
                 'btn_whatsapp'         => 'Start WhatsApp Chat',
                 'whatsapp_prompt'      => 'Have a question or request? Connect with us directly:',
                 'error_required'       => 'This field is required.',
@@ -398,16 +389,16 @@ HTML;
             ],
             'fr' => [
                 'tagline'              => 'Consultation Médicale & Tourisme',
-                'label_first_name'     => 'Prénom',
-                'label_last_name'      => 'Nom',
+                'label_first_name'     => 'Prénom du patient',
+                'label_last_name'      => 'Nom du patient',
                 'label_phone'          => 'Numéro de Téléphone',
-                'label_message'        => 'Votre Message',
-                'placeholder_first_name' => 'Prénom',
-                'placeholder_last_name'  => 'Nom',
+                'label_message'        => 'Décrivez votre état de santé',
+                'placeholder_first_name' => 'Prénom du patient',
+                'placeholder_last_name'  => 'Nom du patient',
                 'placeholder_phone'      => 'Entrez Votre Numéro..',
                 'placeholder_search'     => 'Rechercher un pays...',
-                'placeholder_message'    => 'Tapez votre message...',
-                'btn_submit'           => 'Envoyer le Message',
+                'placeholder_message'    => 'Décrivez votre état ou vos symptômes...',
+                'btn_submit'           => 'Envoyer la demande',
                 'btn_whatsapp'         => 'Discuter sur WhatsApp',
                 'whatsapp_prompt'      => 'Vous avez des questions ou des demandes ? Contactez-nous directly :',
                 'error_required'       => 'Ce champ est obligatoire.',
@@ -431,16 +422,16 @@ HTML;
             ],
             'ar' => [
                 'tagline'              => 'الاستشارة الطبية والسياحة العلاجية',
-                'label_first_name'     => 'الاسم الأول',
-                'label_last_name'      => 'اسم العائلة',
+                'label_first_name'     => 'اسم المريض',
+                'label_last_name'      => 'لقب المريض',
                 'label_phone'          => 'رقم الهاتف',
-                'label_message'        => 'رسالتك',
-                'placeholder_first_name' => 'الاسم الأول',
-                'placeholder_last_name'  => 'اسم العائلة',
+                'label_message'        => 'أخبرنا عن حالتك الطبية',
+                'placeholder_first_name' => 'اسم المريض',
+                'placeholder_last_name'  => 'لقب المريض',
                 'placeholder_phone'      => 'أدخل رقم هاتفك..',
                 'placeholder_search'     => 'ابحث عن بلد...',
-                'placeholder_message'    => 'اكتب رسالتك هنا...',
-                'btn_submit'           => 'إرسال الرسالة',
+                'placeholder_message'    => 'صف حالتك أو الأعراض...',
+                'btn_submit'           => 'إرسال الطلب',
                 'btn_whatsapp'         => 'تواصل عبر واتساب',
                 'whatsapp_prompt'      => 'هل لديك أي استفسار أو طلب خاص؟ تواصل معنا مباشرة:',
                 'error_required'       => 'هذا الحقل مطلوب.',
