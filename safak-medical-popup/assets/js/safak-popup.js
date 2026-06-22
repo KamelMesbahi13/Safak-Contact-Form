@@ -425,6 +425,15 @@
             instanceState.isSubmitting = false;
             setLoadingState( submitBtn, false );
             setDefaultCountryForLang( instanceState, instanceState.lang );
+
+            // Restore branding and controls in the modal
+            const modalContainer = form.closest( '.safak-modal' );
+            if ( modalContainer ) {
+                const branding = modalContainer.querySelector( '.safak-modal__branding' );
+                if ( branding ) branding.style.removeProperty( 'display' );
+                const controls = modalContainer.querySelector( '.safak-modal__controls' );
+                if ( controls ) controls.style.removeProperty( 'display' );
+            }
         };
 
         // When country is manually selected
@@ -775,6 +784,15 @@
                 successPanel.hidden = false;
                 errorPanel.hidden   = true;
                 successPanel.focus();
+
+                // Hide branding and controls in the modal to avoid overlap on success screen
+                const modalContainer = form.closest( '.safak-modal' );
+                if ( modalContainer ) {
+                    const branding = modalContainer.querySelector( '.safak-modal__branding' );
+                    if ( branding ) branding.style.setProperty( 'display', 'none', 'important' );
+                    const controls = modalContainer.querySelector( '.safak-modal__controls' );
+                    if ( controls ) controls.style.setProperty( 'display', 'none', 'important' );
+                }
             } else {
                 if ( data.data && data.data.fields ) {
                     const i18n = ( window.SafakI18n || {} )[ state.lang ] || {};

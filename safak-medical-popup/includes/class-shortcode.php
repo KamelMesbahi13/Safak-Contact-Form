@@ -291,7 +291,7 @@ HTML;
             </button>
             <span class="safak-lang-divider" aria-hidden="true">|</span>
             <button class="safak-lang-btn" data-lang="ar" type="button">
-              <img class="safak-flag-icon" src="https://flagcdn.com/16x12/sa.png" alt="ع" />
+              <img class="safak-flag-icon" src="https://flagcdn.com/16x12/dz.png" alt="ع" />
               <span>ع</span>
             </button>
           </div>
