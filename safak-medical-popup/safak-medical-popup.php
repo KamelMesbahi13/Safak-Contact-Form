@@ -79,18 +79,30 @@ final class Safak_Medical_Popup {
      * OR unconditionally (simpler, reliable approach chosen here for SPA compat).
      */
     public function enqueue_assets(): void {
+        $css_ver = SAFAK_POPUP_VERSION;
+        $css_path = SAFAK_POPUP_DIR . 'assets/css/safak-popup.css';
+        if ( file_exists( $css_path ) ) {
+            $css_ver = (string) filemtime( $css_path );
+        }
+
         wp_enqueue_style(
             'safak-popup-style',
             SAFAK_POPUP_ASSETS . 'css/safak-popup.css',
             [],
-            SAFAK_POPUP_VERSION
+            $css_ver
         );
+
+        $js_ver = SAFAK_POPUP_VERSION;
+        $js_path = SAFAK_POPUP_DIR . 'assets/js/safak-popup.js';
+        if ( file_exists( $js_path ) ) {
+            $js_ver = (string) filemtime( $js_path );
+        }
 
         wp_enqueue_script(
             'safak-popup-script',
             SAFAK_POPUP_ASSETS . 'js/safak-popup.js',
             [],                    // No jQuery dependency – pure vanilla JS.
-            SAFAK_POPUP_VERSION,
+            $js_ver,
             true                   // Load in footer.
         );
 

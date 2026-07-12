@@ -28,7 +28,146 @@ class Safak_Shortcode {
      */
     public static function render_modal_in_footer(): void {
         self::maybe_inline_i18n();
+        echo "<!-- SAFAK POPUP MODAL FOOTER START -->\n";
         echo self::get_modal_html();
+        ?>
+        <script>
+        (function() {
+            function applyModalLanguage(lang) {
+                var i18n = (window.SafakI18n || {})[lang];
+                if (!i18n) return;
+                
+                var modal = document.getElementById('safak-modal');
+                if (!modal) return;
+                
+                modal.querySelectorAll('[data-i18n]').forEach(function(el) {
+                    var key = el.dataset.i18n;
+                    if (i18n[key] !== undefined) {
+                        el.textContent = i18n[key];
+                    }
+                });
+
+                modal.querySelectorAll('[data-i18n-placeholder]').forEach(function(el) {
+                    var key = el.dataset.i18nPlaceholder;
+                    if (i18n[key] !== undefined) {
+                        el.placeholder = i18n[key];
+                    }
+                });
+
+                var isRTL = i18n.dir === 'rtl';
+                modal.setAttribute('data-dir', isRTL ? 'rtl' : 'ltr');
+                modal.setAttribute('dir', isRTL ? 'rtl' : 'ltr');
+
+                modal.querySelectorAll('.safak-lang-btn').forEach(function(btn) {
+                    if (btn.dataset.lang === lang) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                var popupWrapper = modal.querySelector('.safak-form-wrapper-container');
+                if (popupWrapper) {
+                    popupWrapper.dataset.lang = lang;
+                    var hiddenLangInput = popupWrapper.querySelector('[name="language"]');
+                    if (hiddenLangInput) hiddenLangInput.value = lang;
+                    
+                    popupWrapper.querySelectorAll('[placeholder]').forEach(function(el) {
+                        if (el.name === 'first_name' && i18n.placeholder_first_name) el.placeholder = i18n.placeholder_first_name;
+                        if (el.name === 'last_name' && i18n.placeholder_last_name) el.placeholder = i18n.placeholder_last_name;
+                        if (el.name === 'message' && i18n.placeholder_message) el.placeholder = i18n.placeholder_message;
+                    });
+
+                    popupWrapper.querySelectorAll('.safak-form__label').forEach(function(el) {
+                        var nextInput = el.nextElementSibling;
+                        if (nextInput) {
+                            if (nextInput.name === 'first_name' && i18n.label_first_name) el.textContent = i18n.label_first_name;
+                            if (nextInput.name === 'last_name' && i18n.label_last_name) el.textContent = i18n.label_last_name;
+                            if (nextInput.name === 'message' && i18n.label_message) el.textContent = i18n.label_message;
+                        }
+                        if (el.nextElementSibling && el.nextElementSibling.classList.contains('safak-phone-wrapper') && i18n.label_phone) {
+                            el.textContent = i18n.label_phone;
+                        }
+                    });
+                }
+            }
+
+            function closeModal() {
+                var overlay = document.getElementById('safak-popup-overlay');
+                if (!overlay) return;
+                overlay.classList.remove('is-visible');
+                setTimeout(function() {
+                    overlay.hidden = true;
+                    document.body.style.overflow = '';
+                }, 250);
+            }
+
+            document.addEventListener('click', function(e) {
+                // Trigger button click
+                var trigger = e.target.closest('.safak-popup-trigger, #safak-open-popup, a');
+                if (trigger) {
+                    var href = trigger.getAttribute('href') || '';
+                    if (href === '#safak-popup' || href.indexOf('#safak-popup') !== -1) {
+                        e.preventDefault();
+                        var overlay = document.getElementById('safak-popup-overlay');
+                        if (overlay) {
+                            overlay.hidden = false;
+                            void overlay.offsetWidth;
+                            overlay.classList.add('is-visible');
+                            document.body.style.overflow = 'hidden';
+
+                            var closeBtn = document.getElementById('safak-close-btn');
+                            if (closeBtn) {
+                                closeBtn.focus();
+                            }
+
+                            var popupContainer = overlay.querySelector('.safak-form-wrapper-container');
+                            if (popupContainer && popupContainer.resetFormInstance) {
+                                popupContainer.resetFormInstance();
+                            }
+                            
+                            // Dynamically translate modal to correct language based on HTML lang or URL
+                            var htmlLang = document.documentElement.lang || 'en';
+                            var defaultLang = 'en';
+                            if (htmlLang.indexOf('ar') === 0 || window.location.pathname.indexOf('/ar') !== -1) {
+                                defaultLang = 'ar';
+                            } else if (htmlLang.indexOf('fr') === 0 || window.location.pathname.indexOf('/fr') !== -1) {
+                                defaultLang = 'fr';
+                            }
+                            applyModalLanguage(defaultLang);
+                        }
+                        return;
+                    }
+                }
+
+                // Close button click
+                if (e.target.closest('#safak-close-btn')) {
+                    e.preventDefault();
+                    closeModal();
+                    return;
+                }
+
+                // Backdrop click
+                var overlay = document.getElementById('safak-popup-overlay');
+                if (overlay && e.target === overlay) {
+                    closeModal();
+                    return;
+                }
+
+                // Language switcher click
+                var langBtn = e.target.closest('.safak-lang-btn');
+                if (langBtn) {
+                    e.preventDefault();
+                    var lang = langBtn.dataset.lang;
+                    if (lang) {
+                        applyModalLanguage(lang);
+                    }
+                }
+            }, true);
+        })();
+        </script>
+        <?php
+        echo "<!-- SAFAK POPUP MODAL FOOTER END -->\n";
     }
 
     /**
