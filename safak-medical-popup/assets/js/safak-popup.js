@@ -525,6 +525,8 @@
         });
     }
 
+
+
     function setDefaultCountryForLang(state, lang) {
         // As requested: the default flag is strictly the Algerian one (+213) in all 3 languages
         let defCode = '+213', defName = 'Algeria', defFlag = '🇩🇿';
