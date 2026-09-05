@@ -79,17 +79,31 @@ class Safak_Ajax_Handler {
         $message          = sanitize_textarea_field( wp_unslash( $_POST['message']      ?? '' ) );
         $language         = sanitize_text_field( wp_unslash( $_POST['language']         ?? 'en' ) );
 
-        // Whitelist language values.
-        if ( ! in_array( $language, [ 'en', 'fr', 'ar' ], true ) ) {
-            $language = 'en';
+        // Optional fields from banner form.
+        $department       = sanitize_text_field( wp_unslash( $_POST['department']       ?? '' ) );
+        $doctor           = sanitize_text_field( wp_unslash( $_POST['doctor']           ?? '' ) );
+        $email            = sanitize_email( wp_unslash( $_POST['email']                ?? '' ) );
+        $appointment_date = sanitize_text_field( wp_unslash( $_POST['appointment_date'] ?? '' ) );
+        $appointment_time = sanitize_text_field( wp_unslash( $_POST['appointment_time'] ?? '' ) );
+
+        $form_type = sanitize_text_field( wp_unslash( $_POST['form_type'] ?? '' ) );
+        $is_banner = ( $form_type === 'banner' ) || ! empty( $department ) || ! empty( $doctor ) || ! empty( $appointment_date );
+
+        if ( $is_banner ) {
+            if ( empty( $last_name ) || $last_name === '—' || $last_name === '\u2014' ) {
+                $last_name = '—';
+            }
+            if ( empty( $message ) ) {
+                $message = 'Appointment booking via banner form';
+            }
         }
 
         // Required & min character validation to prevent spam (First/Last name: min 2, Phone: min 6, Message: min 5).
         $errors = [];
         if ( empty( $first_name ) || mb_strlen( trim( $first_name ) ) < 2 ) { $errors[] = 'first_name'; }
-        if ( empty( $last_name )  || mb_strlen( trim( $last_name ) ) < 2 )  { $errors[] = 'last_name'; }
-        if ( empty( $phone )      || mb_strlen( trim( $phone ) ) < 6 )      { $errors[] = 'phone'; }
-        if ( empty( $message )    || mb_strlen( trim( $message ) ) < 5 )    { $errors[] = 'message'; }
+        if ( ! $is_banner && ( empty( $last_name ) || mb_strlen( trim( $last_name ) ) < 2 ) ) { $errors[] = 'last_name'; }
+        if ( empty( $phone ) || mb_strlen( trim( $phone ) ) < 6 ) { $errors[] = 'phone'; }
+        if ( ! $is_banner && ( empty( $message ) || mb_strlen( trim( $message ) ) < 5 ) ) { $errors[] = 'message'; }
 
         // Basic phone sanity check – allow digits, +, -, spaces, parentheses (6 to 25 characters).
         if ( ! empty( $phone ) && ! preg_match( '/^[0-9\+\-\s\(\)]{6,25}$/', $phone ) ) {
@@ -108,14 +122,23 @@ class Safak_Ajax_Handler {
         $full_phone = trim( $country_code . ' ' . $phone );
 
         // ── 4. Log to Database ───────────────────────────────────────────────
-        $row_id = Safak_Database::insert_submission( [
+        $db_data = [
             'first_name' => $first_name,
             'last_name'  => $last_name,
             'phone'      => $full_phone,
             'message'    => $message,
             'language'   => $language,
             'ip_address' => $ip_masked,
-        ] );
+        ];
+
+        // Append optional banner form fields.
+        if ( ! empty( $department ) )       { $db_data['department']       = $department; }
+        if ( ! empty( $doctor ) )           { $db_data['doctor']           = $doctor; }
+        if ( ! empty( $email ) )            { $db_data['email']            = $email; }
+        if ( ! empty( $appointment_date ) ) { $db_data['appointment_date'] = $appointment_date; }
+        if ( ! empty( $appointment_time ) ) { $db_data['appointment_time'] = $appointment_time; }
+
+        $row_id = Safak_Database::insert_submission( $db_data );
 
         // ── 5. Send Email Notification ───────────────────────────────────────
         $email_sent = self::send_notification_email(
@@ -128,7 +151,12 @@ class Safak_Ajax_Handler {
             $country_flag_iso,
             $message,
             $language,
-            $ip_masked
+            $ip_masked,
+            $department,
+            $doctor,
+            $email,
+            $appointment_date,
+            $appointment_time
         );
 
         // Respond with success even if email fails – DB log is the fail-safe.
@@ -154,7 +182,12 @@ class Safak_Ajax_Handler {
         string $country_flag_iso,
         string $message,
         string $language,
-        string $ip
+        string $ip,
+        string $department = '',
+        string $doctor = '',
+        string $email_addr = '',
+        string $appointment_date = '',
+        string $appointment_time = ''
     ): bool {
 
         $lang_labels = [
@@ -280,6 +313,41 @@ class Safak_Ajax_Handler {
                     </div>
                   </td>
                 </tr>
+HTML;
+
+        // Append appointment details section if any appointment fields are present.
+        $esc_department        = esc_html( $department );
+        $esc_doctor            = esc_html( $doctor );
+        $esc_email_addr        = esc_html( $email_addr );
+        $esc_appointment_date  = esc_html( $appointment_date );
+        $esc_appointment_time  = esc_html( $appointment_time );
+
+        if ( $department || $doctor || $email_addr || $appointment_date || $appointment_time ) {
+            $html .= <<<HTML
+                <tr>
+                  <td style="padding-top:20px;">
+                    <p style="margin:0 0 16px;font-size:13px;font-weight:700;color:#00558F;letter-spacing:1.5px;text-transform:uppercase;border-bottom:2px solid #E8EFF6;padding-bottom:8px;">
+                      Appointment Details
+                    </p>
+                    <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
+HTML;
+            if ( $esc_department ) {
+                $html .= '<tr><td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Department</td><td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;">' . $esc_department . '</td></tr><tr><td colspan="2" style="height:1px;background:#F0F4F8;"></td></tr>';
+            }
+            if ( $esc_doctor ) {
+                $html .= '<tr><td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Doctor</td><td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;">' . $esc_doctor . '</td></tr><tr><td colspan="2" style="height:1px;background:#F0F4F8;"></td></tr>';
+            }
+            if ( $esc_email_addr ) {
+                $html .= '<tr><td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Email</td><td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;"><a href="mailto:' . $esc_email_addr . '" style="color:#00558F;text-decoration:none;">' . $esc_email_addr . '</a></td></tr><tr><td colspan="2" style="height:1px;background:#F0F4F8;"></td></tr>';
+            }
+            if ( $esc_appointment_date || $esc_appointment_time ) {
+                $datetime = trim( $esc_appointment_date . ' ' . $esc_appointment_time );
+                $html .= '<tr><td width="140" style="font-size:13px;color:#6B7A8D;font-weight:600;vertical-align:top;padding:10px 0;">Appointment</td><td style="font-size:15px;color:#1A2B3C;font-weight:700;vertical-align:top;padding:10px 0;">' . $datetime . '</td></tr>';
+            }
+            $html .= '</table></td></tr>';
+        }
+
+        $html .= <<<HTML
               </table>
 
             </td>

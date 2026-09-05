@@ -3,7 +3,7 @@
  * Plugin Name:       Safak Medical – Popup Consultation Form
  * Plugin URI:        https://safakmedical.com
  * Description:       A lightweight, multilingual (EN/FR/AR) popup consultation form with AJAX submission, email notification, and database logging for Safak Medical.
- * Version:           1.1.1
+ * Version:           1.2.2
  * Author:            Safak Medical Dev Team
  * Author URI:        https://safakmedical.com
  * License:           GPL-2.0-or-later
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // ── Plugin Constants ────────────────────────────────────────────────────────
-define( 'SAFAK_POPUP_VERSION',   '1.1.1' );
+define( 'SAFAK_POPUP_VERSION',   '1.2.2' );
 define( 'SAFAK_POPUP_FILE',      __FILE__ );
 define( 'SAFAK_POPUP_DIR',       plugin_dir_path( __FILE__ ) );
 define( 'SAFAK_POPUP_URL',       plugin_dir_url( __FILE__ ) );
@@ -30,6 +30,7 @@ define( 'SAFAK_POPUP_TABLE',     'safak_form_submissions' );
 require_once SAFAK_POPUP_INCLUDES . 'class-database.php';
 require_once SAFAK_POPUP_INCLUDES . 'class-ajax-handler.php';
 require_once SAFAK_POPUP_INCLUDES . 'class-shortcode.php';
+require_once SAFAK_POPUP_INCLUDES . 'class-admin.php';
 
 // ── Activation / Deactivation Hooks ─────────────────────────────────────────
 register_activation_hook(   __FILE__, [ 'Safak_Medical_Popup', 'activate' ] );
@@ -59,6 +60,7 @@ final class Safak_Medical_Popup {
         // Initialise sub-components.
         Safak_Ajax_Handler::init();
         Safak_Shortcode::init();
+        Safak_Admin::init();
 
         // Register daily database cleanup cron action.
         add_action( 'safak_daily_cleanup_submissions', [ 'Safak_Database', 'delete_old_submissions' ] );

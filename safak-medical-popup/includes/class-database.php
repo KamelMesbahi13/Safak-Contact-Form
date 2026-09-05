@@ -31,14 +31,19 @@ class Safak_Database {
          * – No trailing commas.
          */
         $sql = "CREATE TABLE {$table_name} (
-  id            BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
-  first_name    VARCHAR(100)        NOT NULL,
-  last_name     VARCHAR(100)        NOT NULL,
-  phone         VARCHAR(50)         NOT NULL,
-  message       TEXT                         DEFAULT '',
-  language      VARCHAR(5)          NOT NULL DEFAULT 'en',
-  ip_address    VARCHAR(45)                  DEFAULT '',
-  submitted_at  DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  id                BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT,
+  first_name        VARCHAR(100)        NOT NULL,
+  last_name         VARCHAR(100)        NOT NULL,
+  phone             VARCHAR(50)         NOT NULL,
+  message           TEXT                         DEFAULT '',
+  language          VARCHAR(5)          NOT NULL DEFAULT 'en',
+  ip_address        VARCHAR(45)                  DEFAULT '',
+  department        VARCHAR(150)                 DEFAULT '',
+  doctor            VARCHAR(150)                 DEFAULT '',
+  email             VARCHAR(150)                 DEFAULT '',
+  appointment_date  VARCHAR(20)                  DEFAULT '',
+  appointment_time  VARCHAR(20)                  DEFAULT '',
+  submitted_at      DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY  (id)
 ) {$charset_collate};";
 
@@ -47,7 +52,7 @@ class Safak_Database {
         dbDelta( $sql );
 
         // Store the DB version for future migrations.
-        update_option( 'safak_popup_db_version', '1.0.0' );
+        update_option( 'safak_popup_db_version', '1.1.0' );
     }
 
     /**
@@ -58,8 +63,13 @@ class Safak_Database {
      *     @type string $last_name
      *     @type string $phone
      *     @type string $message
-     *     @type string $language   'en' | 'fr' | 'ar'
+     *     @type string $language         'en' | 'fr' | 'ar'
      *     @type string $ip_address
+     *     @type string $department       (optional)
+     *     @type string $doctor           (optional)
+     *     @type string $email            (optional)
+     *     @type string $appointment_date (optional)
+     *     @type string $appointment_time (optional)
      * }
      * @return int|false  Inserted row ID, or false on failure.
      */
@@ -68,19 +78,41 @@ class Safak_Database {
 
         $table_name = $wpdb->prefix . SAFAK_POPUP_TABLE;
 
-        $inserted = $wpdb->insert(
-            $table_name,
-            [
-                'first_name'   => sanitize_text_field( $data['first_name']   ?? '' ),
-                'last_name'    => sanitize_text_field( $data['last_name']    ?? '' ),
-                'phone'        => sanitize_text_field( $data['phone']        ?? '' ),
-                'message'      => sanitize_textarea_field( $data['message']  ?? '' ),
-                'language'     => sanitize_text_field( $data['language']     ?? 'en' ),
-                'ip_address'   => sanitize_text_field( $data['ip_address']   ?? '' ),
-                'submitted_at' => current_time( 'mysql' ),
-            ],
-            [ '%s', '%s', '%s', '%s', '%s', '%s', '%s' ]   // Data format.
-        );
+        $row = [
+            'first_name'   => sanitize_text_field( $data['first_name']   ?? '' ),
+            'last_name'    => sanitize_text_field( $data['last_name']    ?? '' ),
+            'phone'        => sanitize_text_field( $data['phone']        ?? '' ),
+            'message'      => sanitize_textarea_field( $data['message']  ?? '' ),
+            'language'     => sanitize_text_field( $data['language']     ?? 'en' ),
+            'ip_address'   => sanitize_text_field( $data['ip_address']   ?? '' ),
+            'submitted_at' => current_time( 'mysql' ),
+        ];
+
+        $format = [ '%s', '%s', '%s', '%s', '%s', '%s', '%s' ];
+
+        // Optional appointment fields (from banner form).
+        if ( ! empty( $data['department'] ) ) {
+            $row['department'] = sanitize_text_field( $data['department'] );
+            $format[] = '%s';
+        }
+        if ( ! empty( $data['doctor'] ) ) {
+            $row['doctor'] = sanitize_text_field( $data['doctor'] );
+            $format[] = '%s';
+        }
+        if ( ! empty( $data['email'] ) ) {
+            $row['email'] = sanitize_email( $data['email'] );
+            $format[] = '%s';
+        }
+        if ( ! empty( $data['appointment_date'] ) ) {
+            $row['appointment_date'] = sanitize_text_field( $data['appointment_date'] );
+            $format[] = '%s';
+        }
+        if ( ! empty( $data['appointment_time'] ) ) {
+            $row['appointment_time'] = sanitize_text_field( $data['appointment_time'] );
+            $format[] = '%s';
+        }
+
+        $inserted = $wpdb->insert( $table_name, $row, $format );
 
         return $inserted ? (int) $wpdb->insert_id : false;
     }

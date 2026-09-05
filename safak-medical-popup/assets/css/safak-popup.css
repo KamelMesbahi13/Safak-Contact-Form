@@ -1081,3 +1081,360 @@
   text-align: right;
 }
 
+/* ── 13. Banner Appointment Form (Third Style – Safak Brand Theme) ────────── */
+
+div.safak-banner,
+.safak-banner {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  max-width: 1180px !important;
+  min-height: 280px !important;
+  margin: 24px auto !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 16px !important;
+  box-shadow: 0 12px 35px rgba(0, 0, 0, 0.08) !important;
+  overflow: hidden !important;
+  font-family: var(--safak-font) !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* ── Sidebar ────────────────────────────────────────────────────────────── */
+div.safak-banner__sidebar,
+.safak-banner__sidebar {
+  flex: 0 0 300px !important;
+  max-width: 300px !important;
+  background: linear-gradient(145deg, #0b1f33 0%, #133353 100%) !important;
+  color: #ffffff !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  padding: 36px 30px !important;
+  box-sizing: border-box !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border: none !important;
+}
+
+.safak-banner__emergency {
+  display: flex !important;
+  align-items: center !important;
+  gap: 14px !important;
+  margin-bottom: 18px !important;
+}
+
+.safak-banner__emergency-icon {
+  color: #ffffff !important;
+  flex-shrink: 0 !important;
+  width: 26px !important;
+  height: 26px !important;
+}
+
+.safak-banner__emergency-text {
+  display: flex !important;
+  flex-direction: column !important;
+}
+
+.safak-banner__emergency-label {
+  font-size: 12.5px !important;
+  font-weight: 600 !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  letter-spacing: 0.3px !important;
+  text-transform: uppercase !important;
+}
+
+.safak-banner__emergency-phone {
+  font-size: 21px !important;
+  font-weight: 800 !important;
+  color: #ffffff !important;
+  line-height: 1.2 !important;
+  margin-top: 2px !important;
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  display: inline-block !important;
+}
+
+.safak-banner__description {
+  font-size: 13px !important;
+  color: rgba(255, 255, 255, 0.75) !important;
+  line-height: 1.6 !important;
+  margin: 0 0 24px !important;
+}
+
+.safak-banner-contact-btn,
+.safak-banner__contact-btn {
+  display: inline-block !important;
+  padding: 10px 24px !important;
+  font-size: 13px !important;
+  font-weight: 700 !important;
+  color: #ffffff !important;
+  background: transparent !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
+  border-radius: 50px !important;
+  text-decoration: none !important;
+  text-align: center !important;
+  cursor: pointer !important;
+  transition: all 0.25s ease !important;
+}
+
+.safak-banner-contact-btn:hover,
+.safak-banner__contact-btn:hover {
+  background: #E30213 !important;
+  border-color: #E30213 !important;
+  color: #ffffff !important;
+}
+
+/* ── Content (Form Column) ──────────────────────────────────────────────── */
+div.safak-banner__content,
+.safak-banner__content {
+  flex: 1 !important;
+  background: #ffffff !important;
+  padding: 36px 40px !important;
+  box-sizing: border-box !important;
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+
+.safak-banner-heading,
+.safak-banner__title {
+  font-size: 26px !important;
+  font-weight: 800 !important;
+  color: #1A4A72 !important;
+  margin: 0 0 20px !important;
+  letter-spacing: -0.5px !important;
+  line-height: 1.25 !important;
+  unicode-bidi: isolate !important;
+}
+
+/* ── Form Rows & Controls ───────────────────────────────────────────────── */
+.safak-banner form,
+.safak-banner__form {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+  position: relative !important;
+  z-index: 1 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+.safak-banner__row {
+  display: flex !important;
+  gap: 12px !important;
+  flex-wrap: wrap !important;
+  width: 100% !important;
+}
+
+/* Inputs & Selects Override WordPress Theme Styles completely */
+.safak-banner input[type="text"],
+.safak-banner input[type="tel"],
+.safak-banner input[type="email"],
+.safak-banner input[type="date"],
+.safak-banner input[type="time"],
+.safak-banner select,
+.safak-banner__input,
+.safak-banner__select {
+  display: block !important;
+  width: 100% !important;
+  height: 48px !important;
+  min-height: 48px !important;
+  padding: 11px 14px !important;
+  font-family: inherit !important;
+  font-size: 13.5px !important;
+  font-weight: 400 !important;
+  color: #111827 !important;
+  background-color: #ffffff !important;
+  background-image: none !important;
+  border: 1.5px solid #d1d5db !important;
+  border-radius: 8px !important;
+  outline: none !important;
+  transition: border-color 0.2s, box-shadow 0.2s !important;
+  box-sizing: border-box !important;
+  line-height: normal !important;
+  box-shadow: none !important;
+  -webkit-appearance: none !important;
+  -moz-appearance: none !important;
+  appearance: none !important;
+  margin: 0 !important;
+}
+
+.safak-banner select,
+.safak-banner__select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") !important;
+  background-repeat: no-repeat !important;
+  background-position: right 14px center !important;
+  padding-right: 36px !important;
+  cursor: pointer !important;
+}
+
+.safak-banner input::placeholder {
+  color: #9ca3af !important;
+  opacity: 1 !important;
+}
+
+.safak-banner select option[value=""] {
+  color: #9ca3af !important;
+}
+
+.safak-banner input:focus,
+.safak-banner select:focus {
+  border-color: #1A4A72 !important;
+  box-shadow: 0 0 0 3px rgba(26, 74, 114, 0.12) !important;
+  background-color: #ffffff !important;
+}
+
+/* Force autofill background */
+.safak-banner input:-webkit-autofill,
+.safak-banner input:-webkit-autofill:hover,
+.safak-banner input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  box-shadow: 0 0 0px 1000px #ffffff inset !important;
+  -webkit-text-fill-color: #111827 !important;
+}
+
+/* ── Submit Button (Matches Safak Popup Pill CTA) ────────────────────────── */
+button.safak-banner__submit,
+.safak-banner__submit {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 10px !important;
+  background: #1A4A72 !important;
+  color: #ffffff !important;
+  font-family: inherit !important;
+  font-size: 14.5px !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: 50px !important;
+  padding: 13px 36px !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 14px rgba(26, 74, 114, 0.35) !important;
+  letter-spacing: 0.3px !important;
+  line-height: 1.2 !important;
+  transition: all 0.25s ease !important;
+  outline: none !important;
+  text-decoration: none !important;
+  width: auto !important;
+  min-width: 180px !important;
+}
+
+button.safak-banner__submit:hover:not(:disabled),
+.safak-banner__submit:hover:not(:disabled) {
+  background: #E30213 !important;
+  box-shadow: 0 6px 20px rgba(227, 2, 19, 0.35) !important;
+  transform: translateY(-1px);
+}
+
+button.safak-banner__submit:active:not(:disabled),
+.safak-banner__submit:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+button.safak-banner__submit:disabled,
+.safak-banner__submit:disabled {
+  opacity: 0.75 !important;
+  cursor: not-allowed !important;
+}
+
+/* ── RTL Specific Overrides for Arabic ─────────────────────────────────── */
+.safak-banner[dir="rtl"],
+.safak-banner[data-dir="rtl"],
+[dir="rtl"] .safak-banner {
+  font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif !important;
+}
+
+.safak-banner[dir="rtl"] .safak-banner-heading,
+.safak-banner[dir="rtl"] .safak-banner__title,
+.safak-banner[data-dir="rtl"] .safak-banner-heading,
+[dir="rtl"] .safak-banner .safak-banner-heading {
+  text-align: right !important;
+}
+
+.safak-banner[dir="rtl"] select,
+.safak-banner[dir="rtl"] .safak-banner__select,
+.safak-banner[data-dir="rtl"] select,
+[dir="rtl"] .safak-banner select {
+  background-position: left 14px center !important;
+  padding-left: 36px !important;
+  padding-right: 14px !important;
+  text-align: right !important;
+}
+
+.safak-banner[dir="rtl"] input,
+.safak-banner[data-dir="rtl"] input,
+[dir="rtl"] .safak-banner input {
+  text-align: right !important;
+}
+
+.safak-banner[dir="rtl"] .safak-banner__emergency-phone,
+.safak-banner[data-dir="rtl"] .safak-banner__emergency-phone,
+[dir="rtl"] .safak-banner .safak-banner__emergency-phone {
+  direction: ltr !important;
+  unicode-bidi: isolate !important;
+  text-align: right !important;
+}
+
+/* ── Responsive Behavior ────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  div.safak-banner,
+  .safak-banner {
+    flex-direction: column !important;
+    border-radius: 12px !important;
+    margin: 16px auto !important;
+  }
+
+  div.safak-banner__sidebar,
+  .safak-banner__sidebar {
+    flex: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 28px 24px !important;
+  }
+
+  div.safak-banner__content,
+  .safak-banner__content {
+    padding: 28px 24px !important;
+  }
+
+  .safak-banner-heading,
+  .safak-banner__title {
+    font-size: 22px !important;
+  }
+
+  .safak-banner__row {
+    flex-wrap: wrap !important;
+  }
+}
+
+@media (max-width: 600px) {
+  div.safak-banner__sidebar,
+  .safak-banner__sidebar {
+    padding: 22px 18px !important;
+  }
+
+  div.safak-banner__content,
+  .safak-banner__content {
+    padding: 22px 18px !important;
+  }
+
+  .safak-banner__row {
+    flex-direction: column !important;
+    gap: 10px !important;
+  }
+
+  .safak-banner__row > div {
+    flex: 1 1 100% !important;
+    min-width: 100% !important;
+  }
+
+  button.safak-banner__submit,
+  .safak-banner__submit {
+    width: 100% !important;
+  }
+}

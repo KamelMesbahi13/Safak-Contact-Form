@@ -1,0 +1,259 @@
+/*
+ * safak-admin.css
+ * Safak Medical – WordPress Admin Settings Page Styles
+ */
+
+.safak-admin-wrap {
+    max-width: 960px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+.safak-admin-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.safak-admin-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 0 0 4px;
+}
+
+.safak-admin-subtitle {
+    color: #64748b;
+    font-size: 14px;
+    margin: 0;
+}
+
+.safak-admin-notice {
+    padding: 12px 18px;
+    border-radius: 8px;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.safak-admin-notice--success {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.safak-admin-notice--error {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+.safak-admin-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+@media (max-width: 782px) {
+    .safak-admin-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Cards */
+.safak-admin-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+.safak-admin-card--full {
+    grid-column: 1 / -1;
+}
+
+.safak-admin-card__header {
+    background: #f8fafc;
+    border-bottom: 1px solid #e2e8f0;
+    padding: 16px 20px;
+}
+
+.safak-admin-card__header h2 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.safak-admin-card__body {
+    padding: 20px;
+}
+
+/* Add Row */
+.safak-admin-add-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+}
+
+.safak-admin-add-row--doctor {
+    flex-wrap: wrap;
+}
+
+.safak-admin-input,
+.safak-admin-select {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1e293b;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.safak-admin-input:focus,
+.safak-admin-select:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
+}
+
+/* Buttons */
+.safak-admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 10px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.1s;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.safak-admin-btn--primary {
+    background: #1a4a72;
+    color: #ffffff;
+}
+
+.safak-admin-btn--primary:hover {
+    background: #153d5e;
+}
+
+.safak-admin-btn--sync {
+    background: #ffffff;
+    color: #1a4a72;
+    border: 1.5px solid #cbd5e1;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+.safak-admin-btn--sync:hover {
+    background: #f8fafc;
+    border-color: #1a4a72;
+    color: #1a4a72;
+}
+
+.safak-admin-btn--danger {
+    background: #fef2f2;
+    color: #dc2626;
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+}
+
+.safak-admin-btn--danger:hover {
+    background: #fee2e2;
+}
+
+/* List Items */
+.safak-admin-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.safak-admin-list-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    transition: background 0.15s;
+}
+
+.safak-admin-list-item:hover {
+    background: #f1f5f9;
+}
+
+.safak-admin-list-item__name {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.safak-admin-list-item__badge {
+    display: inline-block;
+    background: #e0f2fe;
+    color: #0369a1;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.safak-admin-empty {
+    color: #94a3b8;
+    font-size: 13px;
+    font-style: italic;
+    margin: 0;
+    padding: 12px 0;
+    text-align: center;
+}
+
+/* Shortcode Reference Table */
+.safak-admin-shortcode-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.safak-admin-shortcode-table th,
+.safak-admin-shortcode-table td {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.safak-admin-shortcode-table th {
+    background: #f8fafc;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+}
+
+.safak-admin-shortcode-table td code {
+    background: #f1f5f9;
+    padding: 3px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    color: #1a4a72;
+    font-weight: 600;
+}

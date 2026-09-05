@@ -20,6 +20,7 @@ class Safak_Shortcode {
     public static function init(): void {
         add_shortcode( 'safak_popup_form_button', [ __CLASS__, 'render' ] );
         add_shortcode( 'safak_inline_form',        [ __CLASS__, 'render_inline_form' ] );
+        add_shortcode( 'safak_banner_form',        [ __CLASS__, 'render_banner_form' ] );
         add_action( 'wp_footer', [ __CLASS__, 'render_modal_in_footer' ] );
     }
 
@@ -622,7 +623,6 @@ class Safak_Shortcode {
                             void overlay.offsetWidth;
                             overlay.classList.add('is-visible');
                             document.body.style.overflow = 'hidden';
-
                             var closeBtn = document.getElementById('safak-close-btn');
                             if (closeBtn) {
                                 closeBtn.focus();
@@ -730,16 +730,469 @@ HTML;
      */
     public static function render_inline_form(): string {
         self::maybe_inline_i18n();
+        $current_lang = self::detect_site_language();
+        return self::get_form_card_html( $current_lang, true );
+    }
 
-        $current_lang = 'en';
-        $locale       = get_locale();
-        if ( strpos( $locale, 'ar' ) === 0 ) {
-            $current_lang = 'ar';
-        } elseif ( strpos( $locale, 'fr' ) === 0 ) {
-            $current_lang = 'fr';
+    /**
+     * Detects site language from Polylang, WPML, TranslatePress, URL, or WP locale.
+     * Returns 'ar', 'fr', or 'en'.
+     */
+    public static function detect_site_language( string $override = '' ): string {
+        if ( ! empty( $override ) && in_array( strtolower( $override ), [ 'ar', 'fr', 'en' ], true ) ) {
+            return strtolower( $override );
         }
 
-        return self::get_form_card_html( $current_lang, true );
+        // 1. Polylang
+        if ( function_exists( 'pll_current_language' ) ) {
+            $pll_lang = pll_current_language( 'slug' );
+            if ( ! empty( $pll_lang ) && in_array( strtolower( $pll_lang ), [ 'ar', 'fr', 'en' ], true ) ) {
+                return strtolower( $pll_lang );
+            }
+        }
+
+        // 2. WPML
+        if ( defined( 'ICL_LANGUAGE_CODE' ) && in_array( strtolower( ICL_LANGUAGE_CODE ), [ 'ar', 'fr', 'en' ], true ) ) {
+            return strtolower( ICL_LANGUAGE_CODE );
+        }
+
+        // 3. TranslatePress
+        if ( class_exists( 'TRP_Translate_Press' ) ) {
+            global $TRP_LANGUAGE;
+            if ( ! empty( $TRP_LANGUAGE ) ) {
+                $sub = substr( strtolower( $TRP_LANGUAGE ), 0, 2 );
+                if ( in_array( $sub, [ 'ar', 'fr', 'en' ], true ) ) {
+                    return $sub;
+                }
+            }
+        }
+
+        // 4. URL path inspection (e.g. safakmedical.com/ar/... or ?lang=ar)
+        if ( ! empty( $_SERVER['REQUEST_URI'] ) ) {
+            $uri = sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) );
+            if ( preg_match( '#/(ar)(/|\?|\#|$)#i', $uri ) || preg_match( '#[?&]lang=ar#i', $uri ) ) {
+                return 'ar';
+            }
+            if ( preg_match( '#/(fr)(/|\?|\#|$)#i', $uri ) || preg_match( '#[?&]lang=fr#i', $uri ) ) {
+                return 'fr';
+            }
+            if ( preg_match( '#/(en)(/|\?|\#|$)#i', $uri ) || preg_match( '#[?&]lang=en#i', $uri ) ) {
+                return 'en';
+            }
+        }
+
+        // 5. WordPress site locale
+        $locale = function_exists( 'determine_locale' ) ? determine_locale() : get_locale();
+        if ( strpos( $locale, 'ar' ) === 0 ) {
+            return 'ar';
+        }
+        if ( strpos( $locale, 'fr' ) === 0 ) {
+            return 'fr';
+        }
+
+        return 'en';
+    }
+
+    /**
+     * Renders the banner appointment form (third display style).
+     * Usage: [safak_banner_form phone="+90-xxx" emergency_text="..." description="..." lang="ar|fr|en"]
+     */
+    public static function render_banner_form( $atts = [] ): string {
+        $atts = is_array( $atts ) ? $atts : [];
+        $req_lang = isset( $atts['lang'] ) ? sanitize_text_field( $atts['lang'] ) : '';
+        $current_lang = self::detect_site_language( $req_lang );
+
+        $banner_i18n = [
+            'en' => [
+                'emergency_text'    => 'Emergency Cases',
+                'description'       => 'For urgent medical consultations and appointments, reach out to our team. We are here to help you 24/7.',
+                'contact_btn'       => 'Contact Us',
+                'title'             => 'Book Appointment Today!',
+                'select_dept'       => 'Select Department',
+                'select_doctor'     => 'Select Doctor',
+                'placeholder_name'  => 'Your Name',
+                'placeholder_phone' => 'Phone Number',
+                'placeholder_email' => 'Email Address',
+                'placeholder_date'  => 'Date',
+                'placeholder_time'  => 'Time',
+                'btn_submit'        => 'Make Appointment',
+                'success_msg'       => 'Your appointment request has been received! Our medical team will contact you shortly.',
+                'error_msg'         => 'Something went wrong. Please try again or call us directly.',
+                'dir'               => 'ltr',
+                'default_depts'     => [
+                    'General Medicine',
+                    'Cardiology',
+                    'Dental Care',
+                    'Plastic Surgery',
+                    'Hair Transplant',
+                    'Orthopedics',
+                    'Ophthalmology',
+                    'Bariatric Surgery',
+                ],
+            ],
+            'fr' => [
+                'emergency_text'    => 'Urgences Médicales',
+                'description'       => 'Pour des consultations médicales urgentes et des rendez-vous, contactez notre équipe disponible 24/7.',
+                'contact_btn'       => 'Contactez-nous',
+                'title'             => "Prenez Rendez-vous Aujourd'hui !",
+                'select_dept'       => 'Sélectionner le Département',
+                'select_doctor'     => 'Sélectionner le Médecin',
+                'placeholder_name'  => 'Votre Nom',
+                'placeholder_phone' => 'Numéro de Téléphone',
+                'placeholder_email' => 'Adresse Email',
+                'placeholder_date'  => 'Date',
+                'placeholder_time'  => 'Heure',
+                'btn_submit'        => 'Prendre Rendez-vous',
+                'success_msg'       => 'Votre demande de rendez-vous a bien été reçue ! Nous vous contacterons sous peu.',
+                'error_msg'         => 'Une erreur est survenue. Veuillez réessayer ou nous appeler directement.',
+                'dir'               => 'ltr',
+                'default_depts'     => [
+                    'Médecine Générale',
+                    'Cardiologie',
+                    'Soins Dentaires',
+                    'Chirurgie Plastique',
+                    'Greffe de Cheveux',
+                    'Orthopédie',
+                    'Ophtalmologie',
+                    'Chirurgie Bariatrique',
+                ],
+            ],
+            'ar' => [
+                'emergency_text'    => 'حالات الطوارئ',
+                'description'       => 'للاستشارات الطبية العاجلة وحجز المواعيد السريعة، تواصل مع فريقنا الطبي المتاح على مدار الساعة.',
+                'contact_btn'       => 'تواصل معنا',
+                'title'             => 'احجز موعدك اليوم!',
+                'select_dept'       => 'اختر القسم',
+                'select_doctor'     => 'اختر الطبيب',
+                'placeholder_name'  => 'الاسم الكامل',
+                'placeholder_phone' => 'رقم الهاتف',
+                'placeholder_email' => 'البريد الإلكتروني',
+                'placeholder_date'  => 'التاريخ',
+                'placeholder_time'  => 'الوقت',
+                'btn_submit'        => 'تأكيد الحجز',
+                'success_msg'       => 'تم استلام طلب موعدك بنجاح! سيتواصل معك فريقنا الطبي قريباً.',
+                'error_msg'         => 'حدث خطأ ما. يرجى المحاولة مرة أخرى أو الاتصال بنا مباشرة.',
+                'dir'               => 'rtl',
+                'default_depts'     => [
+                    'الطب العام',
+                    'أمراض القلب والشرايين',
+                    'طب وجراحة الأسنان',
+                    'جراحة التجميل',
+                    'زراعة الشعر',
+                    'طب وجراحة العظام',
+                    'طب العيون',
+                    'جراحة السمنة والتخسيس',
+                ],
+            ],
+        ];
+
+        $t = $banner_i18n[ $current_lang ] ?? $banner_i18n['en'];
+        $dir = $t['dir'];
+        $is_rtl = ( $dir === 'rtl' );
+        $font_family = $is_rtl ? "'Tajawal', 'Segoe UI', Tahoma, sans-serif" : "var(--safak-font, 'Mako', 'Segoe UI', system-ui, sans-serif)";
+        $text_align = $is_rtl ? 'right' : 'left';
+
+        $parsed_atts = shortcode_atts(
+            [
+                'phone'          => '+90 537 691 76 95',
+                'emergency_text' => $t['emergency_text'],
+                'description'    => $t['description'],
+                'lang'           => $current_lang,
+            ],
+            $atts,
+            'safak_banner_form'
+        );
+
+        $phone          = esc_html( $parsed_atts['phone'] );
+        $tel_url        = 'tel:' . preg_replace( '/[^0-9+]/', '', $phone );
+        $emergency_text = esc_html( $parsed_atts['emergency_text'] );
+        $description    = esc_html( $parsed_atts['description'] );
+        $contact_btn    = esc_html( $t['contact_btn'] );
+        $title          = esc_html( $t['title'] );
+        $select_dept    = esc_attr( $t['select_dept'] );
+        $select_doctor  = esc_attr( $t['select_doctor'] );
+        $ph_name        = esc_attr( $t['placeholder_name'] );
+        $ph_phone       = esc_attr( $t['placeholder_phone'] );
+        $ph_email       = esc_attr( $t['placeholder_email'] );
+        $btn_submit     = esc_html( $t['btn_submit'] );
+        $success_msg    = esc_html( $t['success_msg'] );
+        $error_msg      = esc_html( $t['error_msg'] );
+
+        // Get departments and doctors from admin.
+        $departments = [];
+        $doctors     = [];
+        if ( class_exists( 'Safak_Admin' ) ) {
+            $departments = Safak_Admin::get_departments();
+            $doctors     = Safak_Admin::get_doctors();
+        }
+
+        // Fallback to localized default departments if none configured yet
+        if ( empty( $departments ) && ! empty( $t['default_depts'] ) ) {
+            $departments = $t['default_depts'];
+        }
+
+        $dept_options = '<option value="">' . $select_dept . '</option>';
+        foreach ( $departments as $dept ) {
+            $dept_options .= '<option value="' . esc_attr( $dept ) . '">' . esc_html( $dept ) . '</option>';
+        }
+
+        $doctors_json      = wp_json_encode( $doctors, JSON_UNESCAPED_UNICODE );
+        $select_doctor_js  = esc_js( $t['select_doctor'] );
+        $ajax_url          = admin_url( 'admin-ajax.php' );
+        $nonce             = wp_create_nonce( 'safak_popup_nonce' );
+        $unique_id         = 'safak-banner-' . wp_rand( 1000, 9999 );
+
+        // Select chevron position based on text direction
+        $chevron_svg = "%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='7' viewBox='0 0 12 7'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%239CA3AF' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
+        $select_bg_pos = $is_rtl ? "left 14px center" : "right 14px center";
+        $select_padding = $is_rtl ? "11px 14px 11px 36px" : "11px 36px 11px 14px";
+
+        // Shared input style string (bulletproof with !important to defeat any theme styles)
+        $input_style = "display:block !important;width:100% !important;padding:11px 14px !important;font-family:{$font_family} !important;font-size:13.5px !important;color:#111827 !important;background:#ffffff !important;border:1.5px solid #d1d5db !important;border-radius:8px !important;outline:none !important;box-sizing:border-box !important;height:48px !important;line-height:normal !important;box-shadow:none !important;text-align:{$text_align} !important;margin:0 !important;";
+        $select_style = "display:block !important;width:100% !important;padding:{$select_padding} !important;font-family:{$font_family} !important;font-size:13.5px !important;color:#111827 !important;background:#ffffff url(\"data:image/svg+xml,{$chevron_svg}\") no-repeat {$select_bg_pos} !important;border:1.5px solid #d1d5db !important;border-radius:8px !important;outline:none !important;box-sizing:border-box !important;-webkit-appearance:none !important;-moz-appearance:none !important;appearance:none !important;cursor:pointer !important;height:48px !important;line-height:normal !important;box-shadow:none !important;text-align:{$text_align} !important;margin:0 !important;";
+
+        ob_start();
+        ?>
+<div class="safak-banner" id="<?php echo $unique_id; ?>" dir="<?php echo $dir; ?>" data-dir="<?php echo $dir; ?>" data-lang="<?php echo $current_lang; ?>" style="display:flex !important;flex-direction:row !important;width:100% !important;max-width:1180px !important;min-height:280px !important;margin:24px auto !important;padding:0 !important;background:#ffffff !important;border:1px solid #e5e7eb !important;border-radius:16px !important;box-shadow:0 12px 35px rgba(0,0,0,0.08) !important;overflow:hidden !important;font-family:<?php echo $font_family; ?> !important;box-sizing:border-box !important;position:relative !important;z-index:2 !important;">
+
+    <!-- Sidebar (Safak Dark Navy & Red Theme) -->
+    <div class="safak-banner__sidebar" style="flex:0 0 300px !important;max-width:300px !important;background:linear-gradient(145deg, #0b1f33 0%, #133353 100%) !important;color:#ffffff !important;display:flex !important;flex-direction:column !important;justify-content:center !important;padding:36px 30px !important;box-sizing:border-box !important;position:relative !important;overflow:hidden !important;border:none !important;">
+        <!-- Subtle ambient circle decoration -->
+        <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(227,2,19,0.12) 0%,transparent 70%);pointer-events:none;"></div>
+
+        <div style="position:relative !important;z-index:1 !important;text-align:<?php echo $text_align; ?> !important;">
+            <div style="display:flex !important;align-items:center !important;gap:14px !important;margin-bottom:18px !important;">
+                <div style="width:48px !important;height:48px !important;border-radius:12px !important;background:rgba(255,255,255,0.08) !important;display:flex !important;align-items:center !important;justify-content:center !important;flex-shrink:0 !important;border:1px solid rgba(255,255,255,0.15) !important;">
+                    <svg style="color:#ffffff !important;display:block !important;" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.22 2.18 2 2 0 012.18 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.27 6.27l1.27-.5a2 2 0 012.11.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+                    </svg>
+                </div>
+                <div style="display:flex !important;flex-direction:column !important;">
+                    <span style="font-size:12.5px !important;font-weight:600 !important;color:rgba(255,255,255,0.75) !important;letter-spacing:0.3px !important;text-transform:uppercase !important;"><?php echo $emergency_text; ?></span>
+                    <span dir="ltr" style="font-size:21px !important;font-weight:800 !important;color:#ffffff !important;line-height:1.2 !important;margin-top:2px !important;direction:ltr !important;unicode-bidi:isolate !important;display:inline-block !important;"><?php echo $phone; ?></span>
+                </div>
+            </div>
+
+            <p style="font-size:13px !important;color:rgba(255,255,255,0.75) !important;line-height:1.6 !important;margin:0 0 24px !important;"><?php echo $description; ?></p>
+            <a href="<?php echo esc_attr( $tel_url ); ?>" class="safak-banner-contact-btn" style="display:inline-block !important;padding:10px 24px !important;font-size:13px !important;font-weight:700 !important;color:#ffffff !important;background:transparent !important;border:1.5px solid rgba(255,255,255,0.4) !important;border-radius:50px !important;text-decoration:none !important;text-align:center !important;cursor:pointer !important;transition:all 0.25s ease !important;"><?php echo $contact_btn; ?></a>
+        </div>
+    </div>
+
+    <!-- Main Content Area (Form matching Safak Popup) -->
+    <div class="safak-banner__content" style="flex:1 !important;background:#ffffff !important;padding:36px 40px !important;box-sizing:border-box !important;display:flex !important;flex-direction:column !important;justify-content:center !important;position:relative !important;">
+        <h2 class="safak-banner-heading" style="font-size:26px !important;font-weight:800 !important;color:#1A4A72 !important;margin:0 0 20px !important;letter-spacing:-0.5px !important;line-height:1.25 !important;font-family:<?php echo $font_family; ?> !important;text-align:<?php echo $text_align; ?> !important;unicode-bidi:isolate !important;"><?php echo $title; ?></h2>
+
+        <form id="<?php echo $unique_id; ?>-form" novalidate autocomplete="off" style="display:flex !important;flex-direction:column !important;gap:14px !important;position:relative !important;z-index:1 !important;margin:0 !important;padding:0 !important;">
+            <!-- Anti-spam Honeypot -->
+            <div style="display:none !important;"><input type="text" name="safak_honeypot" value="" autocomplete="off" tabindex="-1" /></div>
+
+            <!-- Row 1: Department, Doctor, Date, Time -->
+            <div class="safak-banner__row" style="display:flex !important;gap:12px !important;flex-wrap:wrap !important;width:100% !important;">
+                <div style="flex:1.4 !important;min-width:160px !important;">
+                    <select name="department" id="<?php echo $unique_id; ?>-dept" style="<?php echo $select_style; ?>"><?php echo $dept_options; ?></select>
+                </div>
+                <div style="flex:1.4 !important;min-width:160px !important;">
+                    <select name="doctor" id="<?php echo $unique_id; ?>-doctor" style="<?php echo $select_style; ?>"><option value=""><?php echo $select_doctor; ?></option></select>
+                </div>
+                <div style="flex:0.8 !important;min-width:110px !important;">
+                    <input type="date" name="appointment_date" style="<?php echo $input_style; ?>" />
+                </div>
+                <div style="flex:0.8 !important;min-width:100px !important;">
+                    <input type="time" name="appointment_time" style="<?php echo $input_style; ?>" />
+                </div>
+            </div>
+
+            <!-- Row 2: Name, Phone, Email -->
+            <div class="safak-banner__row" style="display:flex !important;gap:12px !important;flex-wrap:wrap !important;width:100% !important;">
+                <div style="flex:1 !important;min-width:140px !important;">
+                    <input type="text" name="first_name" placeholder="<?php echo $ph_name; ?>" required autocomplete="given-name" style="<?php echo $input_style; ?>" />
+                </div>
+                <div style="flex:1 !important;min-width:140px !important;">
+                    <input type="tel" name="phone" placeholder="<?php echo $ph_phone; ?>" required autocomplete="tel" style="<?php echo $input_style; ?>" />
+                </div>
+                <div style="flex:1 !important;min-width:140px !important;">
+                    <input type="email" name="email" placeholder="<?php echo $ph_email; ?>" autocomplete="email" style="<?php echo $input_style; ?>" />
+                </div>
+            </div>
+
+            <input type="hidden" name="language" value="<?php echo $current_lang; ?>" />
+            <input type="hidden" name="form_type" value="banner" />
+
+            <!-- Submit Button (inherits style from WordPress / theme) -->
+            <div style="margin-top:8px !important;text-align:<?php echo $text_align; ?> !important;">
+                <button type="submit" class="safak-banner__submit button elementor-button">
+                    <span><?php echo $btn_submit; ?></span>
+                    <span class="safak-banner-spinner" style="display:none;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:safak-spin 0.6s linear infinite;margin-inline-start:8px;vertical-align:middle;" aria-hidden="true"></span>
+                </button>
+            </div>
+        </form>
+
+        <!-- Feedback Messages -->
+        <div id="<?php echo $unique_id; ?>-success" hidden style="display:none;align-items:center;gap:12px;padding:16px 20px;border-radius:8px;font-size:14px;font-weight:600;margin-top:14px;background:rgba(16,185,129,0.08);color:#059669;border:1px solid rgba(16,185,129,0.25);font-family:<?php echo $font_family; ?>;text-align:<?php echo $text_align; ?>;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
+            <span><?php echo $success_msg; ?></span>
+        </div>
+        <div id="<?php echo $unique_id; ?>-error" hidden style="display:none;align-items:center;gap:12px;padding:16px 20px;border-radius:8px;font-size:14px;font-weight:600;margin-top:14px;background:rgba(214,10,23,0.06);color:#DC2626;border:1px solid rgba(214,10,23,0.2);font-family:<?php echo $font_family; ?>;text-align:<?php echo $text_align; ?>;">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+            <span><?php echo $error_msg; ?></span>
+        </div>
+    </div>
+</div>
+
+<script>
+(function() {
+    var bannerId = '<?php echo $unique_id; ?>';
+    var allDoctors = <?php echo $doctors_json; ?>;
+    var ajaxUrl = '<?php echo esc_url( $ajax_url ); ?>';
+    var nonce = '<?php echo esc_js( $nonce ); ?>';
+    var selectDoctorText = '<?php echo $select_doctor_js; ?>';
+    var currentLang = '<?php echo $current_lang; ?>';
+
+    var banner = document.getElementById(bannerId);
+    if (!banner) return;
+
+    var deptSelect   = document.getElementById(bannerId + '-dept');
+    var doctorSelect = document.getElementById(bannerId + '-doctor');
+    var form         = document.getElementById(bannerId + '-form');
+    var successEl    = document.getElementById(bannerId + '-success');
+    var errorEl      = document.getElementById(bannerId + '-error');
+    var submitBtn    = banner.querySelector('.safak-banner__submit');
+    var contactBtn   = banner.querySelector('.safak-banner-contact-btn');
+
+    // Filter doctors when department changes
+    function filterDoctors() {
+        var selectedDept = deptSelect.value;
+        doctorSelect.innerHTML = '<option value="">' + selectDoctorText + '</option>';
+        if (!selectedDept || !allDoctors || !allDoctors.length) return;
+        allDoctors.forEach(function(doc) {
+            if (doc.department === selectedDept) {
+                var opt = document.createElement('option');
+                opt.value = doc.name;
+                opt.textContent = doc.name;
+                doctorSelect.appendChild(opt);
+            }
+        });
+    }
+
+    if (deptSelect) {
+        deptSelect.addEventListener('change', filterDoctors);
+    }
+
+    if (contactBtn) {
+        contactBtn.addEventListener('mouseenter', function() {
+            this.style.setProperty('background', '#E30213', 'important');
+            this.style.setProperty('border-color', '#E30213', 'important');
+        });
+        contactBtn.addEventListener('mouseleave', function() {
+            this.style.setProperty('background', 'transparent', 'important');
+            this.style.setProperty('border-color', 'rgba(255,255,255,0.4)', 'important');
+        });
+    }
+
+    // Input focus ring styles
+    banner.querySelectorAll('input, select').forEach(function(el) {
+        if (el.type === 'hidden' || el.name === 'safak_honeypot') return;
+        el.addEventListener('focus', function() {
+            this.style.setProperty('border-color', '#1A4A72', 'important');
+            this.style.setProperty('box-shadow', '0 0 0 3px rgba(26,74,114,0.12)', 'important');
+        });
+        el.addEventListener('blur', function() {
+            this.style.setProperty('border-color', '#d1d5db', 'important');
+            this.style.setProperty('box-shadow', 'none', 'important');
+        });
+    });
+
+    // Form submission
+    if (form) {
+        var isSubmitting = false;
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (isSubmitting) return;
+
+            var firstName = form.querySelector('[name="first_name"]');
+            var phone     = form.querySelector('[name="phone"]');
+
+            if (firstName && firstName.value.trim() === '') {
+                firstName.focus();
+                firstName.style.setProperty('border-color', '#E30213', 'important');
+                return;
+            }
+            if (phone && phone.value.trim() === '') {
+                phone.focus();
+                phone.style.setProperty('border-color', '#E30213', 'important');
+                return;
+            }
+
+            isSubmitting = true;
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                var sp = submitBtn.querySelector('.safak-banner-spinner');
+                if (sp) sp.style.display = 'inline-block';
+            }
+
+            var formData = new FormData();
+            formData.append('action', 'safak_submit_form');
+            formData.append('nonce', nonce);
+            formData.append('form_type', 'banner');
+            formData.append('first_name', firstName.value.trim());
+            formData.append('last_name', '\u2014');
+            formData.append('phone', phone.value.trim());
+            formData.append('country_name', '');
+            formData.append('country_code', '');
+            formData.append('country_flag', '');
+            formData.append('country_flag_iso', '');
+            formData.append('message', 'Appointment booking via banner form');
+            formData.append('language', currentLang);
+
+            var dept = form.querySelector('[name="department"]');
+            if (dept && dept.value) formData.append('department', dept.value);
+            var doc = form.querySelector('[name="doctor"]');
+            if (doc && doc.value) formData.append('doctor', doc.value);
+            var emailF = form.querySelector('[name="email"]');
+            if (emailF && emailF.value) formData.append('email', emailF.value.trim());
+            var dateF = form.querySelector('[name="appointment_date"]');
+            if (dateF && dateF.value) formData.append('appointment_date', dateF.value);
+            var timeF = form.querySelector('[name="appointment_time"]');
+            if (timeF && timeF.value) formData.append('appointment_time', timeF.value);
+            var hp = form.querySelector('[name="safak_honeypot"]');
+            if (hp) formData.append('safak_honeypot', hp.value);
+
+            fetch(ajaxUrl, { method: 'POST', credentials: 'same-origin', body: formData })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        form.style.display = 'none';
+                        if (successEl) {
+                            successEl.hidden = false;
+                            successEl.style.display = 'flex';
+                        }
+                    } else {
+                        if (errorEl) {
+                            errorEl.hidden = false;
+                            errorEl.style.display = 'flex';
+                        }
+                    }
+                })
+                .catch(function() {
+                    if (errorEl) {
+                        errorEl.hidden = false;
+                        errorEl.style.display = 'flex';
+                    }
+                })
+                .finally(function() {
+                    isSubmitting = false;
+                    if (submitBtn) {
+                        submitBtn.disabled = false;
+                        var sp = submitBtn.querySelector('.safak-banner-spinner');
+                        if (sp) sp.style.display = 'none';
+                    }
+                });
+        });
+    }
+})();
+</script>
+        <?php
+        return ob_get_clean();
     }
 
     /**
@@ -905,13 +1358,7 @@ HTML;
         $medipol_url     = esc_url( $assets_url . 'images/medipol.png' );
         $memorial_url    = esc_url( $assets_url . 'images/memorial.png' );
 
-        $current_lang = 'en';
-        $locale       = get_locale();
-        if ( strpos( $locale, 'ar' ) === 0 ) {
-            $current_lang = 'ar';
-        } elseif ( strpos( $locale, 'fr' ) === 0 ) {
-            $current_lang = 'fr';
-        }
+        $current_lang = self::detect_site_language();
 
         $form_card_html = self::get_form_card_html( $current_lang, false );
 
