@@ -936,6 +936,29 @@ HTML;
             $dept_options .= '<option value="' . esc_attr( $dept ) . '">' . esc_html( $dept ) . '</option>';
         }
 
+        // Fallback default doctors if none configured
+        if ( empty( $doctors ) ) {
+            $doctors = [
+                [ 'name' => 'Dr. Ahmet Yılmaz',   'department' => $departments[0] ?? 'Cardiology' ],
+                [ 'name' => 'Dr. Mehmet Kaya',    'department' => $departments[1] ?? 'Ophthalmology' ],
+                [ 'name' => 'Dr. Ayşe Demir',     'department' => $departments[2] ?? 'Dental Care' ],
+                [ 'name' => 'Dr. Mustafa Çelik',  'department' => $departments[3] ?? 'Plastic & Aesthetic Surgery' ],
+                [ 'name' => 'Dr. Fatma Şahin',    'department' => $departments[4] ?? 'Hair Transplant' ],
+                [ 'name' => 'Dr. Emre Aydın',     'department' => $departments[5] ?? 'Orthopedics & Traumatology' ],
+                [ 'name' => 'Dr. Zeynep Arslan',  'department' => $departments[6] ?? 'General Surgery' ],
+                [ 'name' => 'Dr. Burak Öztürk',   'department' => $departments[7] ?? 'Bariatric Surgery' ],
+            ];
+        }
+
+        $doctor_options = '<option value="">' . $select_doctor . '</option>';
+        foreach ( $doctors as $doc ) {
+            $doc_name = is_array( $doc ) ? ( $doc['name'] ?? '' ) : (string) $doc;
+            $doc_dept = is_array( $doc ) ? ( $doc['department'] ?? '' ) : '';
+            if ( ! empty( $doc_name ) ) {
+                $doctor_options .= '<option value="' . esc_attr( $doc_name ) . '" data-department="' . esc_attr( $doc_dept ) . '">' . esc_html( $doc_name ) . '</option>';
+            }
+        }
+
         $doctors_json      = wp_json_encode( $doctors, JSON_UNESCAPED_UNICODE );
         $select_doctor_js  = esc_js( $t['select_doctor'] );
         $ajax_url          = admin_url( 'admin-ajax.php' );
@@ -953,12 +976,26 @@ HTML;
 
         ob_start();
         ?>
+<style>
+#<?php echo $unique_id; ?> .safak-banner__submit,
+#<?php echo $unique_id; ?> .safak-banner__submit:hover,
+#<?php echo $unique_id; ?> .safak-banner__submit:focus,
+#<?php echo $unique_id; ?> .safak-banner__submit:active,
+#<?php echo $unique_id; ?> .safak-banner-contact-btn,
+#<?php echo $unique_id; ?> .safak-banner-contact-btn:hover,
+#<?php echo $unique_id; ?> .safak-banner-contact-btn:focus,
+#<?php echo $unique_id; ?> .safak-banner-contact-btn:active {
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+    text-shadow: none !important;
+    outline: none !important;
+    filter: none !important;
+}
+</style>
 <div class="safak-banner" id="<?php echo $unique_id; ?>" dir="<?php echo $dir; ?>" data-dir="<?php echo $dir; ?>" data-lang="<?php echo $current_lang; ?>" style="display:flex !important;flex-direction:row !important;width:100% !important;max-width:1180px !important;min-height:280px !important;margin:24px auto !important;padding:0 !important;background:#ffffff !important;border:1px solid #e5e7eb !important;border-radius:16px !important;box-shadow:0 12px 35px rgba(0,0,0,0.08) !important;overflow:hidden !important;font-family:<?php echo $font_family; ?> !important;box-sizing:border-box !important;position:relative !important;z-index:2 !important;">
 
-    <!-- Sidebar (Safak Dark Navy & Red Theme) -->
-    <div class="safak-banner__sidebar" style="flex:0 0 300px !important;max-width:300px !important;background:linear-gradient(145deg, #0b1f33 0%, #133353 100%) !important;color:#ffffff !important;display:flex !important;flex-direction:column !important;justify-content:center !important;padding:36px 30px !important;box-sizing:border-box !important;position:relative !important;overflow:hidden !important;border:none !important;">
-        <!-- Subtle ambient circle decoration -->
-        <div style="position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(227,2,19,0.12) 0%,transparent 70%);pointer-events:none;"></div>
+    <!-- Sidebar (Plain Blue Emergency Cases Box, no gradient) -->
+    <div class="safak-banner__sidebar" style="flex:0 0 300px !important;max-width:300px !important;background:#1A4A72 !important;color:#ffffff !important;display:flex !important;flex-direction:column !important;justify-content:center !important;padding:36px 30px !important;box-sizing:border-box !important;position:relative !important;overflow:hidden !important;border:none !important;">
 
         <div style="position:relative !important;z-index:1 !important;text-align:<?php echo $text_align; ?> !important;">
             <div style="display:flex !important;align-items:center !important;gap:14px !important;margin-bottom:18px !important;">
@@ -974,7 +1011,7 @@ HTML;
             </div>
 
             <p style="font-size:13px !important;color:rgba(255,255,255,0.75) !important;line-height:1.6 !important;margin:0 0 24px !important;"><?php echo $description; ?></p>
-            <a href="<?php echo esc_attr( $tel_url ); ?>" class="safak-banner-contact-btn" style="display:inline-block !important;padding:10px 24px !important;font-size:13px !important;font-weight:700 !important;color:#ffffff !important;background:transparent !important;border:1.5px solid rgba(255,255,255,0.4) !important;border-radius:50px !important;text-decoration:none !important;text-align:center !important;cursor:pointer !important;transition:all 0.25s ease !important;"><?php echo $contact_btn; ?></a>
+            <a href="<?php echo esc_attr( $tel_url ); ?>" class="safak-banner-contact-btn" style="display:inline-block !important;padding:10px 24px !important;font-size:13px !important;font-weight:700 !important;color:#ffffff !important;background:transparent !important;border:1.5px solid rgba(255,255,255,0.4) !important;border-radius:50px !important;text-decoration:none !important;text-align:center !important;cursor:pointer !important;box-shadow:none !important;outline:none !important;transition:all 0.25s ease !important;"><?php echo $contact_btn; ?></a>
         </div>
     </div>
 
@@ -992,7 +1029,7 @@ HTML;
                     <select name="department" id="<?php echo $unique_id; ?>-dept" style="<?php echo $select_style; ?>"><?php echo $dept_options; ?></select>
                 </div>
                 <div style="flex:1.4 !important;min-width:160px !important;">
-                    <select name="doctor" id="<?php echo $unique_id; ?>-doctor" style="<?php echo $select_style; ?>"><option value=""><?php echo $select_doctor; ?></option></select>
+                    <select name="doctor" id="<?php echo $unique_id; ?>-doctor" style="<?php echo $select_style; ?>"><?php echo $doctor_options; ?></select>
                 </div>
                 <div style="flex:0.8 !important;min-width:110px !important;">
                     <input type="date" name="appointment_date" style="<?php echo $input_style; ?>" />
@@ -1059,24 +1096,75 @@ HTML;
     var submitBtn    = banner.querySelector('.safak-banner__submit');
     var contactBtn   = banner.querySelector('.safak-banner-contact-btn');
 
-    // Filter doctors when department changes
-    function filterDoctors() {
-        var selectedDept = deptSelect.value;
+    // Populate and filter doctors
+    function populateDoctors(selectedDept) {
+        if (!doctorSelect) return;
+        var currentSelected = doctorSelect.value;
         doctorSelect.innerHTML = '<option value="">' + selectDoctorText + '</option>';
-        if (!selectedDept || !allDoctors || !allDoctors.length) return;
+        if (!allDoctors || !allDoctors.length) return;
+
+        var cleanSelected = (selectedDept || '').trim().toLowerCase();
+
         allDoctors.forEach(function(doc) {
-            if (doc.department === selectedDept) {
+            var docName = doc.name || '';
+            var docDept = (doc.department || '').trim().toLowerCase();
+
+            var isMatch = !cleanSelected ||
+                          (docDept === cleanSelected) ||
+                          (cleanSelected && docDept.indexOf(cleanSelected) !== -1) ||
+                          (docDept && cleanSelected.indexOf(docDept) !== -1);
+
+            if (isMatch) {
                 var opt = document.createElement('option');
-                opt.value = doc.name;
-                opt.textContent = doc.name;
+                opt.value = docName;
+                opt.textContent = docName;
+                opt.dataset.department = doc.department || '';
+                if (docName === currentSelected) {
+                    opt.selected = true;
+                }
                 doctorSelect.appendChild(opt);
+            }
+        });
+
+        // Fallback: If no doctors matched the selected department, show all doctors
+        if (doctorSelect.options.length <= 1 && allDoctors.length > 0) {
+            allDoctors.forEach(function(doc) {
+                var opt = document.createElement('option');
+                opt.value = doc.name || '';
+                opt.textContent = doc.name || '';
+                opt.dataset.department = doc.department || '';
+                if (doc.name === currentSelected) {
+                    opt.selected = true;
+                }
+                doctorSelect.appendChild(opt);
+            });
+        }
+    }
+
+    if (deptSelect) {
+        deptSelect.addEventListener('change', function() {
+            populateDoctors(this.value);
+        });
+    }
+
+    if (doctorSelect) {
+        doctorSelect.addEventListener('change', function() {
+            var selOpt = this.options[this.selectedIndex];
+            var docDept = selOpt ? selOpt.dataset.department : '';
+            if (docDept && deptSelect && (!deptSelect.value || deptSelect.value === '')) {
+                for (var i = 0; i < deptSelect.options.length; i++) {
+                    if (deptSelect.options[i].value === docDept ||
+                        (deptSelect.options[i].textContent && deptSelect.options[i].textContent.trim().toLowerCase() === docDept.trim().toLowerCase())) {
+                        deptSelect.selectedIndex = i;
+                        break;
+                    }
+                }
             }
         });
     }
 
-    if (deptSelect) {
-        deptSelect.addEventListener('change', filterDoctors);
-    }
+    // Populate on initial load
+    populateDoctors(deptSelect ? deptSelect.value : '');
 
     if (contactBtn) {
         contactBtn.addEventListener('mouseenter', function() {

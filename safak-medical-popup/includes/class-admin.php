@@ -42,8 +42,8 @@ class Safak_Admin {
     /** Add top-level menu page on WordPress admin left sidebar. */
     public static function add_menu_page(): void {
         add_menu_page(
-            __( 'Safak Medical', 'safak-medical-popup' ),
-            __( 'Safak Medical', 'safak-medical-popup' ),
+            __( 'Inscription Form', 'safak-medical-popup' ),
+            __( 'Inscription Form', 'safak-medical-popup' ),
             'manage_options',
             'safak-medical-settings',
             [ __CLASS__, 'render_settings_page' ],
@@ -206,6 +206,18 @@ class Safak_Admin {
     public static function auto_detect_wp_doctors( array $available_depts = [] ): array {
         $doctors = [];
         $doctor_cpts = [ 'doctor', 'doctors' ];
+
+        if ( function_exists( 'get_post_types' ) ) {
+            $all_cpts = get_post_types( [], 'objects' );
+            foreach ( $all_cpts as $slug => $cpt_obj ) {
+                $slug_l  = strtolower( $slug );
+                $label_l = strtolower( $cpt_obj->label ?? '' );
+                if ( strpos( $slug_l, 'doctor' ) !== false || strpos( $label_l, 'doctor' ) !== false || strpos( $slug_l, 'physician' ) !== false ) {
+                    $doctor_cpts[] = $slug;
+                }
+            }
+        }
+        $doctor_cpts = array_unique( $doctor_cpts );
         $found_posts = [];
 
         foreach ( $doctor_cpts as $cpt ) {
@@ -262,6 +274,20 @@ class Safak_Admin {
                     'department' => $doc_dept,
                 ];
             }
+        }
+
+        // Fallback default doctors if none exist in WordPress yet
+        if ( empty( $doctors ) ) {
+            $doctors = [
+                [ 'name' => 'Dr. Ahmet Yılmaz',   'department' => $available_depts[0] ?? 'Cardiology' ],
+                [ 'name' => 'Dr. Mehmet Kaya',    'department' => $available_depts[1] ?? 'Ophthalmology' ],
+                [ 'name' => 'Dr. Ayşe Demir',     'department' => $available_depts[2] ?? 'Dental Care' ],
+                [ 'name' => 'Dr. Mustafa Çelik',  'department' => $available_depts[3] ?? 'Plastic & Aesthetic Surgery' ],
+                [ 'name' => 'Dr. Fatma Şahin',    'department' => $available_depts[4] ?? 'Hair Transplant' ],
+                [ 'name' => 'Dr. Emre Aydın',     'department' => $available_depts[5] ?? 'Orthopedics & Traumatology' ],
+                [ 'name' => 'Dr. Zeynep Arslan',  'department' => $available_depts[6] ?? 'General Surgery' ],
+                [ 'name' => 'Dr. Burak Öztürk',   'department' => $available_depts[7] ?? 'Bariatric Surgery' ],
+            ];
         }
 
         return $doctors;
@@ -447,8 +473,8 @@ class Safak_Admin {
         <div class="wrap safak-admin-wrap">
             <div class="safak-admin-header">
                 <div>
-                    <h1 class="safak-admin-title">Safak Medical Settings</h1>
-                    <p class="safak-admin-subtitle">Manage departments and doctors for the appointment banner form.</p>
+                    <h1 class="safak-admin-title">Inscription Form</h1>
+                    <p class="safak-admin-subtitle">Manage departments and doctors for the inscription form.</p>
                 </div>
                 <div class="safak-admin-header-actions">
                     <button type="button" id="safak-sync-wp-btn" class="safak-admin-btn safak-admin-btn--sync">

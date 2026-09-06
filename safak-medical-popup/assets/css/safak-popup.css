@@ -1438,3 +1438,24 @@ button.safak-banner__submit:disabled,
     width: 100% !important;
   }
 }
+
+/* ── Banner form button shadow removal & plain blue sidebar ── */
+.safak-banner__sidebar {
+  background: #1A4A72 !important;
+}
+
+.safak-banner__submit,
+.safak-banner__submit:hover,
+.safak-banner__submit:focus,
+.safak-banner__submit:active,
+.safak-banner-contact-btn,
+.safak-banner-contact-btn:hover,
+.safak-banner-contact-btn:focus,
+.safak-banner-contact-btn:active {
+  box-shadow: none !important;
+  -webkit-box-shadow: none !important;
+  text-shadow: none !important;
+  outline: none !important;
+  filter: none !important;
+}
+
