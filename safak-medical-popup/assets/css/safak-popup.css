@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Mako&display=swap');
-
 /*
  * safak-popup.css
  * Safak Medical – Redesigned Professional Widescreen Two-Column Modal
@@ -7,6 +5,7 @@
  * Aesthetics: Highly professional, medical tourism portal, trust-focused.
  * Layout: 2-column widescreen grid (Form on Left / Medical info & Trust on Right).
  * Color Palette: Elegant blacks, light greys, pristine white, with high-end clinical details.
+ * Typography: Fully inherited from active WordPress website/theme.
  */
 
 /* ── 1. CSS Custom Properties (Design Tokens) ──────────────────────────────── */
@@ -27,7 +26,7 @@
   --safak-radius:        16px;
   --safak-radius-sm:     8px;
   --safak-transition:    0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  --safak-font:          'Mako', 'Segoe UI', system-ui, sans-serif; /* Mako font for EN/FR */
+  --safak-font:          inherit; /* Inherit typography from website */
 }
 
 /* ── 2. Overlay / Backdrop (Glassmorphism) ────────────────────────────────── */
@@ -611,7 +610,7 @@
 
 [data-dir="rtl"] {
   direction: rtl;
-  font-family: 'Tajawal', sans-serif; /* Dynamic Arabic Font Match */
+  font-family: inherit;
 }
 
 /* RTL Branding Override - align to the right in Arabic to avoid close button overlap */
@@ -1106,14 +1105,14 @@ div.safak-banner,
 /* ── Sidebar ────────────────────────────────────────────────────────────── */
 div.safak-banner__sidebar,
 .safak-banner__sidebar {
-  flex: 0 0 300px !important;
-  max-width: 300px !important;
-  background: linear-gradient(145deg, #0b1f33 0%, #133353 100%) !important;
+  flex: 0 0 320px !important;
+  max-width: 320px !important;
+  background: #1A4A72 !important;
   color: #ffffff !important;
   display: flex !important;
   flex-direction: column !important;
   justify-content: center !important;
-  padding: 36px 30px !important;
+  padding: 36px 26px !important;
   box-sizing: border-box !important;
   position: relative !important;
   overflow: hidden !important;
@@ -1123,32 +1122,36 @@ div.safak-banner__sidebar,
 .safak-banner__emergency {
   display: flex !important;
   align-items: center !important;
-  gap: 14px !important;
+  gap: 12px !important;
   margin-bottom: 18px !important;
 }
 
 .safak-banner__emergency-icon {
   color: #ffffff !important;
   flex-shrink: 0 !important;
-  width: 26px !important;
-  height: 26px !important;
+  width: 24px !important;
+  height: 24px !important;
 }
 
 .safak-banner__emergency-text {
   display: flex !important;
   flex-direction: column !important;
+  min-width: 0 !important;
+  flex: 1 !important;
 }
 
 .safak-banner__emergency-label {
-  font-size: 12.5px !important;
+  font-size: 12px !important;
   font-weight: 600 !important;
   color: rgba(255, 255, 255, 0.75) !important;
   letter-spacing: 0.3px !important;
   text-transform: uppercase !important;
+  white-space: nowrap !important;
 }
 
-.safak-banner__emergency-phone {
-  font-size: 21px !important;
+.safak-banner__emergency-phone,
+.safak-banner-phone {
+  font-size: 20px !important;
   font-weight: 800 !important;
   color: #ffffff !important;
   line-height: 1.2 !important;
@@ -1156,6 +1159,8 @@ div.safak-banner__sidebar,
   direction: ltr !important;
   unicode-bidi: isolate !important;
   display: inline-block !important;
+  white-space: nowrap !important;
+  word-break: keep-all !important;
 }
 
 .safak-banner__description {
@@ -1346,7 +1351,7 @@ button.safak-banner__submit:disabled,
 .safak-banner[dir="rtl"],
 .safak-banner[data-dir="rtl"],
 [dir="rtl"] .safak-banner {
-  font-family: 'Tajawal', 'Segoe UI', Tahoma, sans-serif !important;
+  font-family: inherit !important;
 }
 
 .safak-banner[dir="rtl"] .safak-banner-heading,
@@ -1546,5 +1551,29 @@ button.safak-banner__submit:disabled,
   outline: none !important;
   filter: none !important;
 }
+
+/* ── 14. Universal Typography Inheritance (Inherit from Theme / Website) ─── */
+.safak-banner,
+.safak-modal,
+.safak-overlay,
+.safak-inline-container,
+.safak-inline-form-wrap,
+.safak-trigger-btn {
+  font-family: inherit;
+}
+
+.safak-banner input,
+.safak-banner select,
+.safak-banner button,
+.safak-banner textarea,
+.safak-modal input,
+.safak-modal select,
+.safak-modal button,
+.safak-modal textarea,
+.safak-country-btn,
+.safak-country-search {
+  font-family: inherit;
+}
+
 
 

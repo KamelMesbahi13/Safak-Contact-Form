@@ -889,7 +889,7 @@ HTML;
         $t = $banner_i18n[ $current_lang ] ?? $banner_i18n['en'];
         $dir = $t['dir'];
         $is_rtl = ( $dir === 'rtl' );
-        $font_family = $is_rtl ? "'Tajawal', 'Segoe UI', Tahoma, sans-serif" : "var(--safak-font, 'Mako', 'Segoe UI', system-ui, sans-serif)";
+        $font_family = 'inherit';
         $text_align = $is_rtl ? 'right' : 'left';
 
         $parsed_atts = shortcode_atts(
@@ -970,13 +970,24 @@ HTML;
         $select_bg_pos = $is_rtl ? "left 14px center" : "right 14px center";
         $select_padding = $is_rtl ? "11px 14px 11px 36px" : "11px 36px 11px 14px";
 
-        // Shared input style string (bulletproof with !important to defeat any theme styles)
-        $input_style = "display:block !important;width:100% !important;padding:11px 14px !important;font-family:{$font_family} !important;font-size:13.5px !important;color:#111827 !important;background:#ffffff !important;border:1.5px solid #d1d5db !important;border-radius:8px !important;outline:none !important;box-sizing:border-box !important;height:48px !important;line-height:normal !important;box-shadow:none !important;text-align:{$text_align} !important;margin:0 !important;";
-        $select_style = "display:block !important;width:100% !important;padding:{$select_padding} !important;font-family:{$font_family} !important;font-size:13.5px !important;color:#111827 !important;background:#ffffff url(\"data:image/svg+xml,{$chevron_svg}\") no-repeat {$select_bg_pos} !important;border:1.5px solid #d1d5db !important;border-radius:8px !important;outline:none !important;box-sizing:border-box !important;-webkit-appearance:none !important;-moz-appearance:none !important;appearance:none !important;cursor:pointer !important;height:48px !important;line-height:normal !important;box-shadow:none !important;text-align:{$text_align} !important;margin:0 !important;";
+        // Shared input style string (inherits theme font, allows custom CSS override)
+        $input_style = "display:block !important;width:100% !important;padding:11px 14px !important;font-family:inherit;font-size:13.5px !important;color:#111827 !important;background:#ffffff !important;border:1.5px solid #d1d5db !important;border-radius:8px !important;outline:none !important;box-sizing:border-box !important;height:48px !important;line-height:normal !important;box-shadow:none !important;text-align:{$text_align} !important;margin:0 !important;";
+        $select_style = "display:block !important;width:100% !important;padding:{$select_padding} !important;font-family:inherit;font-size:13.5px !important;color:#111827 !important;background:#ffffff url(\"data:image/svg+xml,{$chevron_svg}\") no-repeat {$select_bg_pos} !important;border:1.5px solid #d1d5db !important;border-radius:8px !important;outline:none !important;box-sizing:border-box !important;-webkit-appearance:none !important;-moz-appearance:none !important;appearance:none !important;cursor:pointer !important;height:48px !important;line-height:normal !important;box-shadow:none !important;text-align:{$text_align} !important;margin:0 !important;";
 
         ob_start();
         ?>
 <style>
+/* ── Safak Typography (Inherits from website theme, allows custom CSS on h2, p, a, inputs) ── */
+#<?php echo $unique_id; ?>.safak-banner {
+    font-family: inherit;
+}
+#<?php echo $unique_id; ?> input,
+#<?php echo $unique_id; ?> select,
+#<?php echo $unique_id; ?> button,
+#<?php echo $unique_id; ?> textarea {
+    font-family: inherit;
+}
+
 /* ── Safak Banner Layout (Desktop & Fluid Responsiveness) ── */
 #<?php echo $unique_id; ?>.safak-banner {
     display: flex !important;
@@ -991,26 +1002,31 @@ HTML;
     border-radius: 16px !important;
     box-shadow: 0 12px 35px rgba(0,0,0,0.08) !important;
     overflow: hidden !important;
-    font-family: <?php echo $font_family; ?> !important;
     box-sizing: border-box !important;
     position: relative !important;
     z-index: 2 !important;
 }
 
 #<?php echo $unique_id; ?> .safak-banner__sidebar {
-    flex: 0 0 300px !important;
-    width: 300px !important;
-    max-width: 300px !important;
+    flex: 0 0 320px !important;
+    width: 320px !important;
+    max-width: 320px !important;
     background: #1A4A72 !important;
     color: #ffffff !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
-    padding: 36px 30px !important;
+    padding: 36px 26px !important;
     box-sizing: border-box !important;
     position: relative !important;
     overflow: hidden !important;
     border: none !important;
+}
+
+#<?php echo $unique_id; ?> .safak-banner-phone {
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    font-size: 20px !important;
 }
 
 #<?php echo $unique_id; ?> .safak-banner__content {
@@ -1032,7 +1048,6 @@ HTML;
     margin: 0 0 20px !important;
     letter-spacing: -0.5px !important;
     line-height: 1.25 !important;
-    font-family: <?php echo $font_family; ?> !important;
     text-align: <?php echo $text_align; ?> !important;
     unicode-bidi: isolate !important;
 }
@@ -1204,15 +1219,15 @@ HTML;
     <!-- Sidebar (Plain Blue Emergency Cases Box, no gradient) -->
     <div class="safak-banner__sidebar">
         <div style="position:relative;z-index:1;text-align:<?php echo $text_align; ?>;">
-            <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
-                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);">
-                    <svg style="color:#ffffff;display:block;" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px;">
+                <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);">
+                    <svg style="color:#ffffff;display:block;" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.22 2.18 2 2 0 012.18 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.27 6.27l1.27-.5a2 2 0 012.11.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
                     </svg>
                 </div>
-                <div style="display:flex;flex-direction:column;">
-                    <span style="font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.75);letter-spacing:0.3px;text-transform:uppercase;"><?php echo $emergency_text; ?></span>
-                    <span class="safak-banner-phone" dir="ltr" style="font-size:21px;font-weight:800;color:#ffffff;line-height:1.2;margin-top:2px;direction:ltr;unicode-bidi:isolate;display:inline-block;"><?php echo $phone; ?></span>
+                <div style="display:flex;flex-direction:column;min-width:0;flex:1;">
+                    <span style="font-size:12px;font-weight:600;color:rgba(255,255,255,0.75);letter-spacing:0.3px;text-transform:uppercase;white-space:nowrap;"><?php echo $emergency_text; ?></span>
+                    <span class="safak-banner-phone" dir="ltr" style="font-size:20px;font-weight:800;color:#ffffff;line-height:1.2;margin-top:2px;direction:ltr;unicode-bidi:isolate;display:inline-block;white-space:nowrap !important;word-break:keep-all !important;"><?php echo $phone; ?></span>
                 </div>
             </div>
 
@@ -1271,11 +1286,11 @@ HTML;
         </form>
 
         <!-- Feedback Messages -->
-        <div id="<?php echo $unique_id; ?>-success" hidden style="display:none;align-items:center;gap:12px;padding:16px 20px;border-radius:8px;font-size:14px;font-weight:600;margin-top:14px;background:rgba(16,185,129,0.08);color:#059669;border:1px solid rgba(16,185,129,0.25);font-family:<?php echo $font_family; ?>;text-align:<?php echo $text_align; ?>;">
+        <div id="<?php echo $unique_id; ?>-success" hidden style="display:none;align-items:center;gap:12px;padding:16px 20px;border-radius:8px;font-size:14px;font-weight:600;margin-top:14px;background:rgba(16,185,129,0.08);color:#059669;border:1px solid rgba(16,185,129,0.25);font-family:inherit;text-align:<?php echo $text_align; ?>;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;"><polyline points="20 6 9 17 4 12"/></svg>
             <span><?php echo $success_msg; ?></span>
         </div>
-        <div id="<?php echo $unique_id; ?>-error" hidden style="display:none;align-items:center;gap:12px;padding:16px 20px;border-radius:8px;font-size:14px;font-weight:600;margin-top:14px;background:rgba(214,10,23,0.06);color:#DC2626;border:1px solid rgba(214,10,23,0.2);font-family:<?php echo $font_family; ?>;text-align:<?php echo $text_align; ?>;">
+        <div id="<?php echo $unique_id; ?>-error" hidden style="display:none;align-items:center;gap:12px;padding:16px 20px;border-radius:8px;font-size:14px;font-weight:600;margin-top:14px;background:rgba(214,10,23,0.06);color:#DC2626;border:1px solid rgba(214,10,23,0.2);font-family:inherit;text-align:<?php echo $text_align; ?>;">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="flex-shrink:0;"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
             <span><?php echo $error_msg; ?></span>
         </div>
