@@ -1380,13 +1380,16 @@ button.safak-banner__submit:disabled,
   text-align: right !important;
 }
 
-/* ── Responsive Behavior ────────────────────────────────────────────────── */
-@media (max-width: 900px) {
+/* ── Responsive Behavior for Banner Form ────────────────────────────────── */
+@media screen and (max-width: 991px) {
   div.safak-banner,
   .safak-banner {
     flex-direction: column !important;
-    border-radius: 12px !important;
-    margin: 16px auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    border-radius: 14px !important;
+    margin: 18px auto !important;
   }
 
   div.safak-banner__sidebar,
@@ -1394,33 +1397,98 @@ button.safak-banner__submit:disabled,
     flex: none !important;
     max-width: 100% !important;
     width: 100% !important;
-    padding: 28px 24px !important;
+    padding: 26px 24px !important;
   }
 
   div.safak-banner__content,
   .safak-banner__content {
+    flex: none !important;
+    max-width: 100% !important;
+    width: 100% !important;
     padding: 28px 24px !important;
   }
 
   .safak-banner-heading,
   .safak-banner__title {
     font-size: 22px !important;
+    margin-bottom: 16px !important;
   }
 
   .safak-banner__row {
     flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  .safak-banner__field {
+    box-sizing: border-box !important;
+  }
+
+  .safak-field-dept,
+  .safak-field-doctor {
+    flex: 1 1 calc(50% - 6px) !important;
+    min-width: 140px !important;
+  }
+
+  .safak-field-date,
+  .safak-field-time {
+    flex: 1 1 calc(50% - 6px) !important;
+    min-width: 100px !important;
+  }
+
+  .safak-field-name,
+  .safak-field-phone {
+    flex: 1 1 calc(50% - 6px) !important;
+    min-width: 130px !important;
+  }
+
+  .safak-field-email {
+    flex: 1 1 100% !important;
+    width: 100% !important;
   }
 }
 
-@media (max-width: 600px) {
+@media screen and (max-width: 640px) {
+  div.safak-banner,
+  .safak-banner {
+    margin: 12px 0 !important;
+    border-radius: 12px !important;
+    box-shadow: 0 4px 18px rgba(0,0,0,0.06) !important;
+  }
+
   div.safak-banner__sidebar,
   .safak-banner__sidebar {
     padding: 22px 18px !important;
+    background: #1A4A72 !important;
+  }
+
+  .safak-banner-phone {
+    font-size: 19px !important;
+  }
+
+  .safak-banner-desc {
+    font-size: 12.5px !important;
+    margin: 0 0 16px !important;
+    line-height: 1.5 !important;
+  }
+
+  .safak-banner-contact-btn {
+    display: block !important;
+    width: 100% !important;
+    padding: 11px 16px !important;
+    box-sizing: border-box !important;
+    text-align: center !important;
   }
 
   div.safak-banner__content,
   .safak-banner__content {
-    padding: 22px 18px !important;
+    padding: 22px 16px !important;
+  }
+
+  .safak-banner-heading,
+  .safak-banner__title {
+    font-size: 20px !important;
+    margin-bottom: 14px !important;
+    text-align: center !important;
   }
 
   .safak-banner__row {
@@ -1428,14 +1496,34 @@ button.safak-banner__submit:disabled,
     gap: 10px !important;
   }
 
-  .safak-banner__row > div {
+  .safak-banner__row > div,
+  .safak-banner__field,
+  .safak-field-dept,
+  .safak-field-doctor,
+  .safak-field-date,
+  .safak-field-time,
+  .safak-field-name,
+  .safak-field-phone,
+  .safak-field-email {
     flex: 1 1 100% !important;
     min-width: 100% !important;
+    width: 100% !important;
+  }
+
+  .safak-banner-submit-wrap {
+    text-align: center !important;
+    margin-top: 6px !important;
   }
 
   button.safak-banner__submit,
   .safak-banner__submit {
+    display: flex !important;
     width: 100% !important;
+    justify-content: center !important;
+    align-items: center !important;
+    padding: 13px 20px !important;
+    font-size: 15px !important;
+    box-sizing: border-box !important;
   }
 }
 
@@ -1458,4 +1546,5 @@ button.safak-banner__submit:disabled,
   outline: none !important;
   filter: none !important;
 }
+
 

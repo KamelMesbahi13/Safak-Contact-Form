@@ -977,6 +977,102 @@ HTML;
         ob_start();
         ?>
 <style>
+/* ── Safak Banner Layout (Desktop & Fluid Responsiveness) ── */
+#<?php echo $unique_id; ?>.safak-banner {
+    display: flex !important;
+    flex-direction: row !important;
+    width: 100% !important;
+    max-width: 1180px !important;
+    min-height: 280px !important;
+    margin: 24px auto !important;
+    padding: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 16px !important;
+    box-shadow: 0 12px 35px rgba(0,0,0,0.08) !important;
+    overflow: hidden !important;
+    font-family: <?php echo $font_family; ?> !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    z-index: 2 !important;
+}
+
+#<?php echo $unique_id; ?> .safak-banner__sidebar {
+    flex: 0 0 300px !important;
+    width: 300px !important;
+    max-width: 300px !important;
+    background: #1A4A72 !important;
+    color: #ffffff !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    padding: 36px 30px !important;
+    box-sizing: border-box !important;
+    position: relative !important;
+    overflow: hidden !important;
+    border: none !important;
+}
+
+#<?php echo $unique_id; ?> .safak-banner__content {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    background: #ffffff !important;
+    padding: 36px 40px !important;
+    box-sizing: border-box !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    position: relative !important;
+}
+
+#<?php echo $unique_id; ?> .safak-banner-heading {
+    font-size: 26px !important;
+    font-weight: 800 !important;
+    color: #1A4A72 !important;
+    margin: 0 0 20px !important;
+    letter-spacing: -0.5px !important;
+    line-height: 1.25 !important;
+    font-family: <?php echo $font_family; ?> !important;
+    text-align: <?php echo $text_align; ?> !important;
+    unicode-bidi: isolate !important;
+}
+
+#<?php echo $unique_id; ?> .safak-banner__row {
+    display: flex !important;
+    gap: 12px !important;
+    flex-wrap: wrap !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+#<?php echo $unique_id; ?> .safak-banner__field {
+    box-sizing: border-box !important;
+}
+
+#<?php echo $unique_id; ?> .safak-field-dept,
+#<?php echo $unique_id; ?> .safak-field-doctor {
+    flex: 1.4 1 180px !important;
+    min-width: 140px !important;
+}
+
+#<?php echo $unique_id; ?> .safak-field-date,
+#<?php echo $unique_id; ?> .safak-field-time {
+    flex: 0.8 1 110px !important;
+    min-width: 100px !important;
+}
+
+#<?php echo $unique_id; ?> .safak-field-name,
+#<?php echo $unique_id; ?> .safak-field-phone,
+#<?php echo $unique_id; ?> .safak-field-email {
+    flex: 1 1 150px !important;
+    min-width: 130px !important;
+}
+
+#<?php echo $unique_id; ?> .safak-banner-submit-wrap {
+    margin-top: 8px !important;
+    text-align: <?php echo $text_align; ?> !important;
+}
+
 #<?php echo $unique_id; ?> .safak-banner__submit,
 #<?php echo $unique_id; ?> .safak-banner__submit:hover,
 #<?php echo $unique_id; ?> .safak-banner__submit:focus,
@@ -991,63 +1087,173 @@ HTML;
     outline: none !important;
     filter: none !important;
 }
+
+/* ── Tablet Screens (<= 991px) ── */
+@media screen and (max-width: 991px) {
+    #<?php echo $unique_id; ?>.safak-banner {
+        flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-height: auto !important;
+        margin: 18px auto !important;
+        border-radius: 14px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner__sidebar {
+        flex: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 26px 24px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner__content {
+        flex: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        padding: 28px 24px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner-heading {
+        font-size: 22px !important;
+        margin-bottom: 16px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-field-dept,
+    #<?php echo $unique_id; ?> .safak-field-doctor {
+        flex: 1 1 calc(50% - 6px) !important;
+        min-width: 140px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-field-date,
+    #<?php echo $unique_id; ?> .safak-field-time {
+        flex: 1 1 calc(50% - 6px) !important;
+        min-width: 100px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-field-name,
+    #<?php echo $unique_id; ?> .safak-field-phone {
+        flex: 1 1 calc(50% - 6px) !important;
+        min-width: 130px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-field-email {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+    }
+}
+
+/* ── Mobile Screens (<= 640px) ── */
+@media screen and (max-width: 640px) {
+    #<?php echo $unique_id; ?>.safak-banner {
+        margin: 12px 0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 18px rgba(0,0,0,0.06) !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner__sidebar {
+        padding: 22px 18px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner-phone {
+        font-size: 19px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner-desc {
+        font-size: 12.5px !important;
+        margin: 0 0 16px !important;
+        line-height: 1.5 !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner-contact-btn {
+        display: block !important;
+        width: 100% !important;
+        padding: 11px 16px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner__content {
+        padding: 22px 16px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner-heading {
+        font-size: 20px !important;
+        margin-bottom: 14px !important;
+        text-align: center !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner__row {
+        flex-direction: column !important;
+        gap: 10px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner__field,
+    #<?php echo $unique_id; ?> .safak-field-dept,
+    #<?php echo $unique_id; ?> .safak-field-doctor,
+    #<?php echo $unique_id; ?> .safak-field-date,
+    #<?php echo $unique_id; ?> .safak-field-time,
+    #<?php echo $unique_id; ?> .safak-field-name,
+    #<?php echo $unique_id; ?> .safak-field-phone,
+    #<?php echo $unique_id; ?> .safak-field-email {
+        flex: 1 1 100% !important;
+        width: 100% !important;
+        min-width: 100% !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner-submit-wrap {
+        text-align: center !important;
+        margin-top: 6px !important;
+    }
+    #<?php echo $unique_id; ?> .safak-banner__submit {
+        display: flex !important;
+        width: 100% !important;
+        justify-content: center !important;
+        align-items: center !important;
+        padding: 13px 20px !important;
+        font-size: 15px !important;
+        box-sizing: border-box !important;
+    }
+}
 </style>
-<div class="safak-banner" id="<?php echo $unique_id; ?>" dir="<?php echo $dir; ?>" data-dir="<?php echo $dir; ?>" data-lang="<?php echo $current_lang; ?>" style="display:flex !important;flex-direction:row !important;width:100% !important;max-width:1180px !important;min-height:280px !important;margin:24px auto !important;padding:0 !important;background:#ffffff !important;border:1px solid #e5e7eb !important;border-radius:16px !important;box-shadow:0 12px 35px rgba(0,0,0,0.08) !important;overflow:hidden !important;font-family:<?php echo $font_family; ?> !important;box-sizing:border-box !important;position:relative !important;z-index:2 !important;">
+<div class="safak-banner" id="<?php echo $unique_id; ?>" dir="<?php echo $dir; ?>" data-dir="<?php echo $dir; ?>" data-lang="<?php echo $current_lang; ?>">
 
     <!-- Sidebar (Plain Blue Emergency Cases Box, no gradient) -->
-    <div class="safak-banner__sidebar" style="flex:0 0 300px !important;max-width:300px !important;background:#1A4A72 !important;color:#ffffff !important;display:flex !important;flex-direction:column !important;justify-content:center !important;padding:36px 30px !important;box-sizing:border-box !important;position:relative !important;overflow:hidden !important;border:none !important;">
-
-        <div style="position:relative !important;z-index:1 !important;text-align:<?php echo $text_align; ?> !important;">
-            <div style="display:flex !important;align-items:center !important;gap:14px !important;margin-bottom:18px !important;">
-                <div style="width:48px !important;height:48px !important;border-radius:12px !important;background:rgba(255,255,255,0.08) !important;display:flex !important;align-items:center !important;justify-content:center !important;flex-shrink:0 !important;border:1px solid rgba(255,255,255,0.15) !important;">
-                    <svg style="color:#ffffff !important;display:block !important;" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <div class="safak-banner__sidebar">
+        <div style="position:relative;z-index:1;text-align:<?php echo $text_align; ?>;">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:18px;">
+                <div style="width:48px;height:48px;border-radius:12px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;border:1px solid rgba(255,255,255,0.15);">
+                    <svg style="color:#ffffff;display:block;" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.22 2.18 2 2 0 012.18 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.27 6.27l1.27-.5a2 2 0 012.11.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
                     </svg>
                 </div>
-                <div style="display:flex !important;flex-direction:column !important;">
-                    <span style="font-size:12.5px !important;font-weight:600 !important;color:rgba(255,255,255,0.75) !important;letter-spacing:0.3px !important;text-transform:uppercase !important;"><?php echo $emergency_text; ?></span>
-                    <span dir="ltr" style="font-size:21px !important;font-weight:800 !important;color:#ffffff !important;line-height:1.2 !important;margin-top:2px !important;direction:ltr !important;unicode-bidi:isolate !important;display:inline-block !important;"><?php echo $phone; ?></span>
+                <div style="display:flex;flex-direction:column;">
+                    <span style="font-size:12.5px;font-weight:600;color:rgba(255,255,255,0.75);letter-spacing:0.3px;text-transform:uppercase;"><?php echo $emergency_text; ?></span>
+                    <span class="safak-banner-phone" dir="ltr" style="font-size:21px;font-weight:800;color:#ffffff;line-height:1.2;margin-top:2px;direction:ltr;unicode-bidi:isolate;display:inline-block;"><?php echo $phone; ?></span>
                 </div>
             </div>
 
-            <p style="font-size:13px !important;color:rgba(255,255,255,0.75) !important;line-height:1.6 !important;margin:0 0 24px !important;"><?php echo $description; ?></p>
-            <a href="<?php echo esc_attr( $tel_url ); ?>" class="safak-banner-contact-btn" style="display:inline-block !important;padding:10px 24px !important;font-size:13px !important;font-weight:700 !important;color:#ffffff !important;background:transparent !important;border:1.5px solid rgba(255,255,255,0.4) !important;border-radius:50px !important;text-decoration:none !important;text-align:center !important;cursor:pointer !important;box-shadow:none !important;outline:none !important;transition:all 0.25s ease !important;"><?php echo $contact_btn; ?></a>
+            <p class="safak-banner-desc" style="font-size:13px;color:rgba(255,255,255,0.75);line-height:1.6;margin:0 0 24px;"><?php echo $description; ?></p>
+            <a href="<?php echo esc_attr( $tel_url ); ?>" class="safak-banner-contact-btn" style="display:inline-block;padding:10px 24px;font-size:13px;font-weight:700;color:#ffffff;background:transparent;border:1.5px solid rgba(255,255,255,0.4);border-radius:50px;text-decoration:none;text-align:center;cursor:pointer;transition:all 0.25s ease;"><?php echo $contact_btn; ?></a>
         </div>
     </div>
 
     <!-- Main Content Area (Form matching Safak Popup) -->
-    <div class="safak-banner__content" style="flex:1 !important;background:#ffffff !important;padding:36px 40px !important;box-sizing:border-box !important;display:flex !important;flex-direction:column !important;justify-content:center !important;position:relative !important;">
-        <h2 class="safak-banner-heading" style="font-size:26px !important;font-weight:800 !important;color:#1A4A72 !important;margin:0 0 20px !important;letter-spacing:-0.5px !important;line-height:1.25 !important;font-family:<?php echo $font_family; ?> !important;text-align:<?php echo $text_align; ?> !important;unicode-bidi:isolate !important;"><?php echo $title; ?></h2>
+    <div class="safak-banner__content">
+        <h2 class="safak-banner-heading"><?php echo $title; ?></h2>
 
         <form id="<?php echo $unique_id; ?>-form" novalidate autocomplete="off" style="display:flex !important;flex-direction:column !important;gap:14px !important;position:relative !important;z-index:1 !important;margin:0 !important;padding:0 !important;">
             <!-- Anti-spam Honeypot -->
             <div style="display:none !important;"><input type="text" name="safak_honeypot" value="" autocomplete="off" tabindex="-1" /></div>
 
             <!-- Row 1: Department, Doctor, Date, Time -->
-            <div class="safak-banner__row" style="display:flex !important;gap:12px !important;flex-wrap:wrap !important;width:100% !important;">
-                <div style="flex:1.4 !important;min-width:160px !important;">
+            <div class="safak-banner__row">
+                <div class="safak-banner__field safak-field-dept">
                     <select name="department" id="<?php echo $unique_id; ?>-dept" style="<?php echo $select_style; ?>"><?php echo $dept_options; ?></select>
                 </div>
-                <div style="flex:1.4 !important;min-width:160px !important;">
+                <div class="safak-banner__field safak-field-doctor">
                     <select name="doctor" id="<?php echo $unique_id; ?>-doctor" style="<?php echo $select_style; ?>"><?php echo $doctor_options; ?></select>
                 </div>
-                <div style="flex:0.8 !important;min-width:110px !important;">
+                <div class="safak-banner__field safak-field-date">
                     <input type="date" name="appointment_date" style="<?php echo $input_style; ?>" />
                 </div>
-                <div style="flex:0.8 !important;min-width:100px !important;">
+                <div class="safak-banner__field safak-field-time">
                     <input type="time" name="appointment_time" style="<?php echo $input_style; ?>" />
                 </div>
             </div>
 
             <!-- Row 2: Name, Phone, Email -->
-            <div class="safak-banner__row" style="display:flex !important;gap:12px !important;flex-wrap:wrap !important;width:100% !important;">
-                <div style="flex:1 !important;min-width:140px !important;">
+            <div class="safak-banner__row">
+                <div class="safak-banner__field safak-field-name">
                     <input type="text" name="first_name" placeholder="<?php echo $ph_name; ?>" required autocomplete="given-name" style="<?php echo $input_style; ?>" />
                 </div>
-                <div style="flex:1 !important;min-width:140px !important;">
+                <div class="safak-banner__field safak-field-phone">
                     <input type="tel" name="phone" placeholder="<?php echo $ph_phone; ?>" required autocomplete="tel" style="<?php echo $input_style; ?>" />
                 </div>
-                <div style="flex:1 !important;min-width:140px !important;">
+                <div class="safak-banner__field safak-field-email">
                     <input type="email" name="email" placeholder="<?php echo $ph_email; ?>" autocomplete="email" style="<?php echo $input_style; ?>" />
                 </div>
             </div>
@@ -1056,7 +1262,7 @@ HTML;
             <input type="hidden" name="form_type" value="banner" />
 
             <!-- Submit Button (inherits style from WordPress / theme) -->
-            <div style="margin-top:8px !important;text-align:<?php echo $text_align; ?> !important;">
+            <div class="safak-banner-submit-wrap">
                 <button type="submit" class="safak-banner__submit button elementor-button">
                     <span><?php echo $btn_submit; ?></span>
                     <span class="safak-banner-spinner" style="display:none;width:14px;height:14px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:safak-spin 0.6s linear infinite;margin-inline-start:8px;vertical-align:middle;" aria-hidden="true"></span>
