@@ -918,12 +918,12 @@ HTML;
         $success_msg    = esc_html( $t['success_msg'] );
         $error_msg      = esc_html( $t['error_msg'] );
 
-        // Get departments and doctors from admin.
+        // Get departments and doctors from admin (language-aware).
         $departments = [];
         $doctors     = [];
         if ( class_exists( 'Safak_Admin' ) ) {
-            $departments = Safak_Admin::get_departments();
-            $doctors     = Safak_Admin::get_doctors();
+            $departments = Safak_Admin::get_departments_for_lang( $current_lang );
+            $doctors     = Safak_Admin::get_doctors_for_lang( $current_lang );
         }
 
         // Fallback to localized default departments if none configured yet

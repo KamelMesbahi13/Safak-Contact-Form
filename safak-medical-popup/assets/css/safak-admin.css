@@ -226,6 +226,101 @@
     text-align: center;
 }
 
+/* ── Mode Toggle ─────────────────────────────────────────────────────────── */
+.safak-mode-toggle {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.safak-mode-option {
+    flex: 1;
+    min-width: 200px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px 20px;
+    border: 2px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    position: relative;
+}
+
+.safak-mode-option:hover {
+    border-color: #94a3b8;
+}
+
+.safak-mode-option--active {
+    border-color: #1a4a72;
+    background: #f0f7ff;
+}
+
+.safak-mode-option input[type="radio"] {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    margin: 0;
+    accent-color: #1a4a72;
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.safak-mode-option__label {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+    padding-right: 30px;
+}
+
+.safak-mode-option__desc {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* ── Language Tabs ───────────────────────────────────────────────────────── */
+.safak-lang-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 0;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.safak-lang-tab {
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.safak-lang-tab:hover {
+    color: #1e293b;
+}
+
+.safak-lang-tab--active {
+    color: #1a4a72;
+    border-bottom-color: #1a4a72;
+}
+
+/* ── Language Panel ──────────────────────────────────────────────────────── */
+.safak-lang-panel {
+    padding-top: 24px;
+}
+
+/* ── Header Actions (Sync button row) ────────────────────────────────────── */
+.safak-admin-header-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
 /* Shortcode Reference Table */
 .safak-admin-shortcode-table {
     width: 100%;

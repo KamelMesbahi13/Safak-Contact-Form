@@ -4,8 +4,9 @@
  *
  * Provides a WordPress admin settings page for managing
  * departments and doctors used in the banner appointment form.
- * Automatically synchronizes existing WordPress departments, taxonomies,
- * procedures, and doctor custom post types.
+ * Supports two modes:
+ *   1. WordPress Sync – auto-detect from CPTs/taxonomies
+ *   2. Manual – per-language (AR/FR/EN) department & doctor lists
  *
  * @package Safak_Medical_Popup
  */
@@ -17,24 +18,41 @@ if ( ! defined( 'ABSPATH' ) ) {
 class Safak_Admin {
 
     /** Option keys. */
-    const OPT_DEPARTMENTS = 'safak_departments';
-    const OPT_DOCTORS     = 'safak_doctors';
+    const OPT_DEPARTMENTS        = 'safak_departments';
+    const OPT_DOCTORS            = 'safak_doctors';
+    const OPT_DATA_MODE          = 'safak_data_mode';
+    const OPT_MANUAL_DEPARTMENTS = 'safak_manual_departments';
+    const OPT_MANUAL_DOCTORS     = 'safak_manual_doctors';
+
+    /** Supported languages. */
+    const LANGUAGES = [
+        'ar' => 'العربية',
+        'fr' => 'Français',
+        'en' => 'English',
+    ];
 
     /** Register hooks. */
     public static function init(): void {
         add_action( 'admin_menu',            [ __CLASS__, 'add_menu_page' ] );
         add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_admin_assets' ] );
 
-        // AJAX handlers for departments.
+        // AJAX handlers for departments (WP Sync mode).
         add_action( 'wp_ajax_safak_add_department',    [ __CLASS__, 'ajax_add_department' ] );
         add_action( 'wp_ajax_safak_remove_department', [ __CLASS__, 'ajax_remove_department' ] );
 
-        // AJAX handlers for doctors.
+        // AJAX handlers for doctors (WP Sync mode).
         add_action( 'wp_ajax_safak_add_doctor',        [ __CLASS__, 'ajax_add_doctor' ] );
         add_action( 'wp_ajax_safak_remove_doctor',     [ __CLASS__, 'ajax_remove_doctor' ] );
 
         // AJAX handler for WordPress auto-sync.
         add_action( 'wp_ajax_safak_sync_wp_data',      [ __CLASS__, 'ajax_sync_wp_data' ] );
+
+        // AJAX handlers for mode toggle & manual data.
+        add_action( 'wp_ajax_safak_save_data_mode',           [ __CLASS__, 'ajax_save_data_mode' ] );
+        add_action( 'wp_ajax_safak_add_manual_department',    [ __CLASS__, 'ajax_add_manual_department' ] );
+        add_action( 'wp_ajax_safak_remove_manual_department', [ __CLASS__, 'ajax_remove_manual_department' ] );
+        add_action( 'wp_ajax_safak_add_manual_doctor',        [ __CLASS__, 'ajax_add_manual_doctor' ] );
+        add_action( 'wp_ajax_safak_remove_manual_doctor',     [ __CLASS__, 'ajax_remove_manual_doctor' ] );
     }
 
     // ── Menu Registration ───────────────────────────────────────────────────
@@ -74,9 +92,87 @@ class Safak_Admin {
         );
 
         wp_localize_script( 'safak-admin-script', 'SafakAdmin', [
-            'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-            'nonce'   => wp_create_nonce( 'safak_admin_nonce' ),
+            'ajaxUrl'  => admin_url( 'admin-ajax.php' ),
+            'nonce'    => wp_create_nonce( 'safak_admin_nonce' ),
+            'dataMode' => self::get_data_mode(),
+            'manualDepartments' => self::get_all_manual_departments(),
+            'manualDoctors'     => self::get_all_manual_doctors(),
         ] );
+    }
+
+    // ── Mode Helpers ────────────────────────────────────────────────────────
+
+    /** Get current data mode: 'wp_sync' or 'manual'. */
+    public static function get_data_mode(): string {
+        $mode = get_option( self::OPT_DATA_MODE, 'wp_sync' );
+        return in_array( $mode, [ 'wp_sync', 'manual' ], true ) ? $mode : 'wp_sync';
+    }
+
+    /** Get all manual departments (all languages). */
+    public static function get_all_manual_departments(): array {
+        $data = get_option( self::OPT_MANUAL_DEPARTMENTS, [] );
+        if ( ! is_array( $data ) ) {
+            $data = [];
+        }
+        // Ensure all language keys exist
+        foreach ( array_keys( self::LANGUAGES ) as $lang ) {
+            if ( ! isset( $data[ $lang ] ) || ! is_array( $data[ $lang ] ) ) {
+                $data[ $lang ] = [];
+            }
+        }
+        return $data;
+    }
+
+    /** Get all manual doctors (all languages). */
+    public static function get_all_manual_doctors(): array {
+        $data = get_option( self::OPT_MANUAL_DOCTORS, [] );
+        if ( ! is_array( $data ) ) {
+            $data = [];
+        }
+        foreach ( array_keys( self::LANGUAGES ) as $lang ) {
+            if ( ! isset( $data[ $lang ] ) || ! is_array( $data[ $lang ] ) ) {
+                $data[ $lang ] = [];
+            }
+        }
+        return $data;
+    }
+
+    // ── Public Language-Aware Getters (used by Shortcode) ───────────────────
+
+    /**
+     * Get departments for a specific language.
+     * If mode is 'manual', returns the manual list for that language.
+     * If mode is 'wp_sync', returns the WP-synced list (language-agnostic).
+     */
+    public static function get_departments_for_lang( string $lang = 'en' ): array {
+        $mode = self::get_data_mode();
+
+        if ( $mode === 'manual' ) {
+            $all = self::get_all_manual_departments();
+            $deps = $all[ $lang ] ?? [];
+            return ! empty( $deps ) ? $deps : [];
+        }
+
+        // WP Sync mode — use original logic
+        return self::get_departments();
+    }
+
+    /**
+     * Get doctors for a specific language.
+     * If mode is 'manual', returns the manual list for that language.
+     * If mode is 'wp_sync', returns the WP-synced list (language-agnostic).
+     */
+    public static function get_doctors_for_lang( string $lang = 'en' ): array {
+        $mode = self::get_data_mode();
+
+        if ( $mode === 'manual' ) {
+            $all = self::get_all_manual_doctors();
+            $docs = $all[ $lang ] ?? [];
+            return ! empty( $docs ) ? $docs : [];
+        }
+
+        // WP Sync mode — use original logic
+        return self::get_doctors();
     }
 
     // ── WordPress Auto-Detection Helpers ─────────────────────────────────────
@@ -318,6 +414,142 @@ class Safak_Admin {
         return is_array( $docs ) ? $docs : [];
     }
 
+    // ── AJAX: Save Data Mode ────────────────────────────────────────────────
+
+    public static function ajax_save_data_mode(): void {
+        check_ajax_referer( 'safak_admin_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $mode = sanitize_text_field( wp_unslash( $_POST['mode'] ?? '' ) );
+        if ( ! in_array( $mode, [ 'wp_sync', 'manual' ], true ) ) {
+            wp_send_json_error( [ 'message' => 'Invalid mode.' ] );
+        }
+
+        update_option( self::OPT_DATA_MODE, $mode );
+        wp_send_json_success( [ 'mode' => $mode ] );
+    }
+
+    // ── AJAX: Manual Departments ────────────────────────────────────────────
+
+    public static function ajax_add_manual_department(): void {
+        check_ajax_referer( 'safak_admin_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $lang = sanitize_text_field( wp_unslash( $_POST['lang'] ?? '' ) );
+        $name = sanitize_text_field( wp_unslash( $_POST['department_name'] ?? '' ) );
+
+        if ( ! array_key_exists( $lang, self::LANGUAGES ) ) {
+            wp_send_json_error( [ 'message' => 'Invalid language.' ] );
+        }
+        if ( empty( $name ) ) {
+            wp_send_json_error( [ 'message' => 'Department name is required.' ] );
+        }
+
+        $all = self::get_all_manual_departments();
+
+        if ( in_array( $name, $all[ $lang ], true ) ) {
+            wp_send_json_error( [ 'message' => 'Department already exists.' ] );
+        }
+
+        $all[ $lang ][] = $name;
+        update_option( self::OPT_MANUAL_DEPARTMENTS, $all );
+
+        wp_send_json_success( [ 'departments' => $all ] );
+    }
+
+    public static function ajax_remove_manual_department(): void {
+        check_ajax_referer( 'safak_admin_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $lang = sanitize_text_field( wp_unslash( $_POST['lang'] ?? '' ) );
+        $name = sanitize_text_field( wp_unslash( $_POST['department_name'] ?? '' ) );
+
+        if ( ! array_key_exists( $lang, self::LANGUAGES ) ) {
+            wp_send_json_error( [ 'message' => 'Invalid language.' ] );
+        }
+
+        $all_deps = self::get_all_manual_departments();
+        $all_deps[ $lang ] = array_values( array_filter( $all_deps[ $lang ], fn( $d ) => $d !== $name ) );
+        update_option( self::OPT_MANUAL_DEPARTMENTS, $all_deps );
+
+        // Also remove doctors in that department for this language
+        $all_docs = self::get_all_manual_doctors();
+        $all_docs[ $lang ] = array_values( array_filter( $all_docs[ $lang ], fn( $doc ) => ( $doc['department'] ?? '' ) !== $name ) );
+        update_option( self::OPT_MANUAL_DOCTORS, $all_docs );
+
+        wp_send_json_success( [ 'departments' => $all_deps, 'doctors' => $all_docs ] );
+    }
+
+    // ── AJAX: Manual Doctors ────────────────────────────────────────────────
+
+    public static function ajax_add_manual_doctor(): void {
+        check_ajax_referer( 'safak_admin_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $lang       = sanitize_text_field( wp_unslash( $_POST['lang'] ?? '' ) );
+        $name       = sanitize_text_field( wp_unslash( $_POST['doctor_name'] ?? '' ) );
+        $department = sanitize_text_field( wp_unslash( $_POST['doctor_department'] ?? '' ) );
+
+        if ( ! array_key_exists( $lang, self::LANGUAGES ) ) {
+            wp_send_json_error( [ 'message' => 'Invalid language.' ] );
+        }
+        if ( empty( $name ) ) {
+            wp_send_json_error( [ 'message' => 'Doctor name is required.' ] );
+        }
+        if ( empty( $department ) ) {
+            wp_send_json_error( [ 'message' => 'Please select a department.' ] );
+        }
+
+        $all = self::get_all_manual_doctors();
+
+        foreach ( $all[ $lang ] as $doc ) {
+            if ( $doc['name'] === $name && $doc['department'] === $department ) {
+                wp_send_json_error( [ 'message' => 'This doctor already exists in that department.' ] );
+            }
+        }
+
+        $all[ $lang ][] = [
+            'name'       => $name,
+            'department' => $department,
+        ];
+        update_option( self::OPT_MANUAL_DOCTORS, $all );
+
+        wp_send_json_success( [ 'doctors' => $all ] );
+    }
+
+    public static function ajax_remove_manual_doctor(): void {
+        check_ajax_referer( 'safak_admin_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized.' ], 403 );
+        }
+
+        $lang  = sanitize_text_field( wp_unslash( $_POST['lang'] ?? '' ) );
+        $index = intval( $_POST['doctor_index'] ?? -1 );
+
+        if ( ! array_key_exists( $lang, self::LANGUAGES ) ) {
+            wp_send_json_error( [ 'message' => 'Invalid language.' ] );
+        }
+
+        $all = self::get_all_manual_doctors();
+
+        if ( $index < 0 || $index >= count( $all[ $lang ] ) ) {
+            wp_send_json_error( [ 'message' => 'Invalid doctor index.' ] );
+        }
+
+        array_splice( $all[ $lang ], $index, 1 );
+        update_option( self::OPT_MANUAL_DOCTORS, $all );
+
+        wp_send_json_success( [ 'doctors' => $all ] );
+    }
+
     // ── AJAX: WordPress Sync ────────────────────────────────────────────────
 
     public static function ajax_sync_wp_data(): void {
@@ -363,7 +595,7 @@ class Safak_Admin {
         ] );
     }
 
-    // ── AJAX: Departments ───────────────────────────────────────────────────
+    // ── AJAX: Departments (WP Sync mode) ────────────────────────────────────
 
     public static function ajax_add_department(): void {
         check_ajax_referer( 'safak_admin_nonce', 'nonce' );
@@ -406,7 +638,7 @@ class Safak_Admin {
         wp_send_json_success( [ 'departments' => $departments, 'doctors' => $doctors ] );
     }
 
-    // ── AJAX: Doctors ───────────────────────────────────────────────────────
+    // ── AJAX: Doctors (WP Sync mode) ────────────────────────────────────────
 
     public static function ajax_add_doctor(): void {
         check_ajax_referer( 'safak_admin_nonce', 'nonce' );
@@ -467,8 +699,11 @@ class Safak_Admin {
             return;
         }
 
+        $data_mode   = self::get_data_mode();
         $departments = self::get_departments();
         $doctors     = self::get_doctors();
+        $manual_deps = self::get_all_manual_departments();
+        $manual_docs = self::get_all_manual_doctors();
         ?>
         <div class="wrap safak-admin-wrap">
             <div class="safak-admin-header">
@@ -476,75 +711,211 @@ class Safak_Admin {
                     <h1 class="safak-admin-title">Inscription Form</h1>
                     <p class="safak-admin-subtitle">Manage departments and doctors for the inscription form.</p>
                 </div>
-                <div class="safak-admin-header-actions">
+            </div>
+
+            <div id="safak-admin-notice" class="safak-admin-notice" style="display:none;"></div>
+
+            <!-- ── Data Source Toggle ──────────────────────── -->
+            <div class="safak-admin-card safak-admin-card--full" style="margin-bottom:24px;">
+                <div class="safak-admin-card__header">
+                    <h2>Data Source</h2>
+                </div>
+                <div class="safak-admin-card__body">
+                    <div class="safak-mode-toggle">
+                        <label class="safak-mode-option <?php echo $data_mode === 'wp_sync' ? 'safak-mode-option--active' : ''; ?>">
+                            <input type="radio" name="safak_data_mode" value="wp_sync" <?php checked( $data_mode, 'wp_sync' ); ?>>
+                            <span class="safak-mode-option__label">Sync from WordPress</span>
+                            <span class="safak-mode-option__desc">Auto-detect departments & doctors from your WordPress post types and taxonomies.</span>
+                        </label>
+                        <label class="safak-mode-option <?php echo $data_mode === 'manual' ? 'safak-mode-option--active' : ''; ?>">
+                            <input type="radio" name="safak_data_mode" value="manual" <?php checked( $data_mode, 'manual' ); ?>>
+                            <span class="safak-mode-option__label">Manual Data</span>
+                            <span class="safak-mode-option__desc">Enter departments & doctors manually for each language (Arabic, French, English).</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════════════════
+                 WP SYNC MODE PANELS
+                 ══════════════════════════════════════════════════════════════ -->
+            <div id="safak-wp-sync-panels" style="<?php echo $data_mode === 'wp_sync' ? '' : 'display:none;'; ?>">
+
+                <div class="safak-admin-header-actions" style="margin-bottom:18px;">
                     <button type="button" id="safak-sync-wp-btn" class="safak-admin-btn safak-admin-btn--sync">
                         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:middle;"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
                         <span>Sync with WordPress</span>
                     </button>
                 </div>
+
+                <div class="safak-admin-grid">
+
+                    <!-- ── Departments Panel ──────────────────────── -->
+                    <div class="safak-admin-card">
+                        <div class="safak-admin-card__header">
+                            <h2>Departments</h2>
+                        </div>
+                        <div class="safak-admin-card__body">
+                            <div class="safak-admin-add-row">
+                                <input type="text" id="safak-dept-input" class="safak-admin-input" placeholder="e.g. Cardiology" />
+                                <button type="button" id="safak-add-dept-btn" class="safak-admin-btn safak-admin-btn--primary">+ Add</button>
+                            </div>
+                            <div id="safak-dept-list" class="safak-admin-list">
+                                <?php if ( empty( $departments ) ) : ?>
+                                    <p class="safak-admin-empty">No departments added yet.</p>
+                                <?php else : ?>
+                                    <?php foreach ( $departments as $dept ) : ?>
+                                        <div class="safak-admin-list-item" data-name="<?php echo esc_attr( $dept ); ?>">
+                                            <span class="safak-admin-list-item__name"><?php echo esc_html( $dept ); ?></span>
+                                            <button type="button" class="safak-admin-btn safak-admin-btn--danger safak-remove-dept" data-name="<?php echo esc_attr( $dept ); ?>">✕</button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Doctors Panel ──────────────────────────── -->
+                    <div class="safak-admin-card">
+                        <div class="safak-admin-card__header">
+                            <h2>Doctors</h2>
+                        </div>
+                        <div class="safak-admin-card__body">
+                            <div class="safak-admin-add-row safak-admin-add-row--doctor">
+                                <input type="text" id="safak-doctor-input" class="safak-admin-input" placeholder="Dr. Name" />
+                                <select id="safak-doctor-dept-select" class="safak-admin-select">
+                                    <option value="">— Select Department —</option>
+                                    <?php foreach ( $departments as $dept ) : ?>
+                                        <option value="<?php echo esc_attr( $dept ); ?>"><?php echo esc_html( $dept ); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <button type="button" id="safak-add-doctor-btn" class="safak-admin-btn safak-admin-btn--primary">+ Add</button>
+                            </div>
+                            <div id="safak-doctor-list" class="safak-admin-list">
+                                <?php if ( empty( $doctors ) ) : ?>
+                                    <p class="safak-admin-empty">No doctors added yet.</p>
+                                <?php else : ?>
+                                    <?php foreach ( $doctors as $idx => $doc ) : ?>
+                                        <div class="safak-admin-list-item" data-index="<?php echo $idx; ?>">
+                                            <span class="safak-admin-list-item__name"><?php echo esc_html( $doc['name'] ); ?></span>
+                                            <span class="safak-admin-list-item__badge"><?php echo esc_html( $doc['department'] ); ?></span>
+                                            <button type="button" class="safak-admin-btn safak-admin-btn--danger safak-remove-doctor" data-index="<?php echo $idx; ?>">✕</button>
+                                        </div>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
             </div>
 
-            <div id="safak-admin-notice" class="safak-admin-notice" style="display:none;"></div>
+            <!-- ══════════════════════════════════════════════════════════════
+                 MANUAL MODE PANELS
+                 ══════════════════════════════════════════════════════════════ -->
+            <div id="safak-manual-panels" style="<?php echo $data_mode === 'manual' ? '' : 'display:none;'; ?>">
 
-            <div class="safak-admin-grid">
-
-                <!-- ── Departments Panel ──────────────────────── -->
-                <div class="safak-admin-card">
-                    <div class="safak-admin-card__header">
-                        <h2>Departments</h2>
-                    </div>
-                    <div class="safak-admin-card__body">
-                        <div class="safak-admin-add-row">
-                            <input type="text" id="safak-dept-input" class="safak-admin-input" placeholder="e.g. Cardiology" />
-                            <button type="button" id="safak-add-dept-btn" class="safak-admin-btn safak-admin-btn--primary">+ Add</button>
-                        </div>
-                        <div id="safak-dept-list" class="safak-admin-list">
-                            <?php if ( empty( $departments ) ) : ?>
-                                <p class="safak-admin-empty">No departments added yet.</p>
-                            <?php else : ?>
-                                <?php foreach ( $departments as $dept ) : ?>
-                                    <div class="safak-admin-list-item" data-name="<?php echo esc_attr( $dept ); ?>">
-                                        <span class="safak-admin-list-item__name"><?php echo esc_html( $dept ); ?></span>
-                                        <button type="button" class="safak-admin-btn safak-admin-btn--danger safak-remove-dept" data-name="<?php echo esc_attr( $dept ); ?>">✕</button>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                <!-- Language Tabs -->
+                <div class="safak-lang-tabs">
+                    <?php $first = true; foreach ( self::LANGUAGES as $code => $label ) : ?>
+                        <button type="button"
+                                class="safak-lang-tab <?php echo $first ? 'safak-lang-tab--active' : ''; ?>"
+                                data-lang="<?php echo esc_attr( $code ); ?>">
+                            <?php echo esc_html( $label ); ?>
+                        </button>
+                    <?php $first = false; endforeach; ?>
                 </div>
 
-                <!-- ── Doctors Panel ──────────────────────────── -->
-                <div class="safak-admin-card">
-                    <div class="safak-admin-card__header">
-                        <h2>Doctors</h2>
-                    </div>
-                    <div class="safak-admin-card__body">
-                        <div class="safak-admin-add-row safak-admin-add-row--doctor">
-                            <input type="text" id="safak-doctor-input" class="safak-admin-input" placeholder="Dr. Name" />
-                            <select id="safak-doctor-dept-select" class="safak-admin-select">
-                                <option value="">— Select Department —</option>
-                                <?php foreach ( $departments as $dept ) : ?>
-                                    <option value="<?php echo esc_attr( $dept ); ?>"><?php echo esc_html( $dept ); ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                            <button type="button" id="safak-add-doctor-btn" class="safak-admin-btn safak-admin-btn--primary">+ Add</button>
-                        </div>
-                        <div id="safak-doctor-list" class="safak-admin-list">
-                            <?php if ( empty( $doctors ) ) : ?>
-                                <p class="safak-admin-empty">No doctors added yet.</p>
-                            <?php else : ?>
-                                <?php foreach ( $doctors as $idx => $doc ) : ?>
-                                    <div class="safak-admin-list-item" data-index="<?php echo $idx; ?>">
-                                        <span class="safak-admin-list-item__name"><?php echo esc_html( $doc['name'] ); ?></span>
-                                        <span class="safak-admin-list-item__badge"><?php echo esc_html( $doc['department'] ); ?></span>
-                                        <button type="button" class="safak-admin-btn safak-admin-btn--danger safak-remove-doctor" data-index="<?php echo $idx; ?>">✕</button>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
+                <!-- Per-Language Panels -->
+                <?php $first = true; foreach ( self::LANGUAGES as $code => $label ) :
+                    $lang_deps = $manual_deps[ $code ] ?? [];
+                    $lang_docs = $manual_docs[ $code ] ?? [];
+                ?>
+                    <div class="safak-lang-panel <?php echo $first ? 'safak-lang-panel--active' : ''; ?>"
+                         data-lang="<?php echo esc_attr( $code ); ?>"
+                         style="<?php echo $first ? '' : 'display:none;'; ?>">
 
+                        <div class="safak-admin-grid">
+
+                            <!-- Departments for this language -->
+                            <div class="safak-admin-card">
+                                <div class="safak-admin-card__header">
+                                    <h2>Departments — <?php echo esc_html( $label ); ?></h2>
+                                </div>
+                                <div class="safak-admin-card__body">
+                                    <div class="safak-admin-add-row">
+                                        <input type="text"
+                                               class="safak-admin-input safak-manual-dept-input"
+                                               data-lang="<?php echo esc_attr( $code ); ?>"
+                                               placeholder="<?php echo $code === 'ar' ? 'مثال: أمراض القلب' : ( $code === 'fr' ? 'ex: Cardiologie' : 'e.g. Cardiology' ); ?>"
+                                               <?php echo $code === 'ar' ? 'dir="rtl"' : ''; ?> />
+                                        <button type="button"
+                                                class="safak-admin-btn safak-admin-btn--primary safak-add-manual-dept-btn"
+                                                data-lang="<?php echo esc_attr( $code ); ?>">+ Add</button>
+                                    </div>
+                                    <div class="safak-admin-list safak-manual-dept-list" data-lang="<?php echo esc_attr( $code ); ?>">
+                                        <?php if ( empty( $lang_deps ) ) : ?>
+                                            <p class="safak-admin-empty">No departments added yet.</p>
+                                        <?php else : ?>
+                                            <?php foreach ( $lang_deps as $dept ) : ?>
+                                                <div class="safak-admin-list-item" data-name="<?php echo esc_attr( $dept ); ?>">
+                                                    <span class="safak-admin-list-item__name"><?php echo esc_html( $dept ); ?></span>
+                                                    <button type="button"
+                                                            class="safak-admin-btn safak-admin-btn--danger safak-remove-manual-dept"
+                                                            data-lang="<?php echo esc_attr( $code ); ?>"
+                                                            data-name="<?php echo esc_attr( $dept ); ?>">✕</button>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Doctors for this language -->
+                            <div class="safak-admin-card">
+                                <div class="safak-admin-card__header">
+                                    <h2>Doctors — <?php echo esc_html( $label ); ?></h2>
+                                </div>
+                                <div class="safak-admin-card__body">
+                                    <div class="safak-admin-add-row safak-admin-add-row--doctor">
+                                        <input type="text"
+                                               class="safak-admin-input safak-manual-doctor-input"
+                                               data-lang="<?php echo esc_attr( $code ); ?>"
+                                               placeholder="<?php echo $code === 'ar' ? 'د. الاسم' : ( $code === 'fr' ? 'Dr. Nom' : 'Dr. Name' ); ?>"
+                                               <?php echo $code === 'ar' ? 'dir="rtl"' : ''; ?> />
+                                        <select class="safak-admin-select safak-manual-doctor-dept-select"
+                                                data-lang="<?php echo esc_attr( $code ); ?>">
+                                            <option value=""><?php echo $code === 'ar' ? '— اختر القسم —' : ( $code === 'fr' ? '— Sélectionner —' : '— Select Department —' ); ?></option>
+                                            <?php foreach ( $lang_deps as $dept ) : ?>
+                                                <option value="<?php echo esc_attr( $dept ); ?>"><?php echo esc_html( $dept ); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                        <button type="button"
+                                                class="safak-admin-btn safak-admin-btn--primary safak-add-manual-doctor-btn"
+                                                data-lang="<?php echo esc_attr( $code ); ?>">+ Add</button>
+                                    </div>
+                                    <div class="safak-admin-list safak-manual-doctor-list" data-lang="<?php echo esc_attr( $code ); ?>">
+                                        <?php if ( empty( $lang_docs ) ) : ?>
+                                            <p class="safak-admin-empty">No doctors added yet.</p>
+                                        <?php else : ?>
+                                            <?php foreach ( $lang_docs as $idx => $doc ) : ?>
+                                                <div class="safak-admin-list-item" data-index="<?php echo $idx; ?>">
+                                                    <span class="safak-admin-list-item__name"><?php echo esc_html( $doc['name'] ); ?></span>
+                                                    <span class="safak-admin-list-item__badge"><?php echo esc_html( $doc['department'] ); ?></span>
+                                                    <button type="button"
+                                                            class="safak-admin-btn safak-admin-btn--danger safak-remove-manual-doctor"
+                                                            data-lang="<?php echo esc_attr( $code ); ?>"
+                                                            data-index="<?php echo $idx; ?>">✕</button>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                <?php $first = false; endforeach; ?>
             </div>
 
             <!-- Shortcode Reference -->
