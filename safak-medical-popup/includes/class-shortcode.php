@@ -1042,12 +1042,7 @@ HTML;
 }
 
 #<?php echo $unique_id; ?> .safak-banner-heading {
-    font-size: 26px !important;
-    font-weight: 800 !important;
-    color: #1A4A72 !important;
     margin: 0 0 20px !important;
-    letter-spacing: -0.5px !important;
-    line-height: 1.25 !important;
     text-align: <?php echo $text_align; ?> !important;
     unicode-bidi: isolate !important;
 }
@@ -1126,7 +1121,6 @@ HTML;
         padding: 28px 24px !important;
     }
     #<?php echo $unique_id; ?> .safak-banner-heading {
-        font-size: 22px !important;
         margin-bottom: 16px !important;
     }
     #<?php echo $unique_id; ?> .safak-field-dept,
@@ -1179,7 +1173,6 @@ HTML;
         padding: 22px 16px !important;
     }
     #<?php echo $unique_id; ?> .safak-banner-heading {
-        font-size: 20px !important;
         margin-bottom: 14px !important;
         text-align: center !important;
     }
@@ -1238,7 +1231,7 @@ HTML;
 
     <!-- Main Content Area (Form matching Safak Popup) -->
     <div class="safak-banner__content">
-        <h2 class="safak-banner-heading"><?php echo $title; ?></h2>
+        <h3 class="safak-banner-heading"><?php echo $title; ?></h3>
 
         <form id="<?php echo $unique_id; ?>-form" novalidate autocomplete="off" style="display:flex !important;flex-direction:column !important;gap:14px !important;position:relative !important;z-index:1 !important;margin:0 !important;padding:0 !important;">
             <!-- Anti-spam Honeypot -->

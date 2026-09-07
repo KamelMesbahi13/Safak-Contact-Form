@@ -1208,12 +1208,8 @@ div.safak-banner__content,
 
 .safak-banner-heading,
 .safak-banner__title {
-  font-size: 26px !important;
-  font-weight: 800 !important;
   color: #1A4A72 !important;
   margin: 0 0 20px !important;
-  letter-spacing: -0.5px !important;
-  line-height: 1.25 !important;
   unicode-bidi: isolate !important;
 }
 
@@ -1415,7 +1411,6 @@ button.safak-banner__submit:disabled,
 
   .safak-banner-heading,
   .safak-banner__title {
-    font-size: 22px !important;
     margin-bottom: 16px !important;
   }
 
@@ -1491,7 +1486,6 @@ button.safak-banner__submit:disabled,
 
   .safak-banner-heading,
   .safak-banner__title {
-    font-size: 20px !important;
     margin-bottom: 14px !important;
     text-align: center !important;
   }
